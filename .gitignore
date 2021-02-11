@@ -1,0 +1,11 @@
+# Editor-related files
+.vscode
+.vs
+*.sln
+*.vcxproj*
+
+# Build results
+*Binaries*
+Docs/Build
+Docs/Source/API
+*Intermediate*

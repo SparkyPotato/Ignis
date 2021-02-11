@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<Type Name="Ignis::Atomic&lt;u64&gt;">
+		<DisplayString>{m_Value}</DisplayString>
+		<Expand></Expand>
+	</Type>
+	
+	<Type Name="Ignis::Array&lt;*&gt;">
+		<DisplayString>Size = {m_Size}</DisplayString>
+		<Expand>
+			<Item Name="Capacity">m_Capacity</Item>
+			<ArrayItems>
+				<Size>m_Size</Size>
+				<ValuePointer>m_Data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Ignis::ArrayRef&lt;*&gt;">
+		<DisplayString>Size = {m_Size}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>m_Size</Size>
+				<ValuePointer>m_Data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Ignis::Char">
+		<DisplayString>'{&amp;Data, [1]s32b}'</DisplayString>
+		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::FunctionRef&lt;*&gt;">
+		<DisplayString>{*m_Callable}</DisplayString>
+		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::FunctionRef::Callable&lt;*&gt;">
+		<DisplayString>{m_Callable}</DisplayString>
+		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::RawAllocator">
+		<DisplayString>Raw Allocator</DisplayString>
+		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::StealQueue&lt;*&gt;">
+		<DisplayString>Size = {m_Bottom - m_Top}</DisplayString>
+		<Expand>
+			<Item Name="Capacity">m_Size</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="Ignis::String">
+		<DisplayString Condition="u64(m_Alloc) &amp; 1">{m_Repr.Small.Data, s8}</DisplayString>
+		<DisplayString Condition="!(u64(m_Alloc) &amp; 1)">{m_Repr.Big.Data, s8}</DisplayString>
+		<Expand>
+			<Item Name="Size" Condition="u64(m_Alloc) &amp; 1">m_SmallSize - m_Repr.Small.Data[m_SmallSize]</Item>
+			<Item Name="Capacity" Condition="u64(m_Alloc) &amp; 1">m_SmallSize</Item>
+			<Item Name="Size" Condition="!(u64(m_Alloc) &amp; 1)">m_Repr.Big.Size</Item>
+			<Item Name="Capacity" Condition="!(u64(m_Alloc) &amp; 1)">m_Repr.Big.Capacity</Item>
+			<Item Name="Small">(u64(m_Alloc) &amp; 1) == 1</Item>
+			<Item Name="Allocator">*(reinterpret_cast&lt;Allocator*&gt;(u64(m_Alloc) &amp; (u64(-1) - 1)))</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Ignis::StringRef">
+		<DisplayString>{m_Data, [m_Size]s8}</DisplayString>
+		<Expand>
+			<Item Name="Size">m_Size</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Ignis::Thread">
+		<DisplayString>ID = {m_ID}</DisplayString>
+		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::UniquePtr&lt;*&gt;">
+		<DisplayString>{*m_Ptr}</DisplayString>
+		<Expand>
+			<Item Name="Value">*m_Ptr</Item>
+		</Expand>
+	</Type>
+	
+</AutoVisualizer>
