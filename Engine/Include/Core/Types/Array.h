@@ -125,9 +125,9 @@ public:
 		m_Capacity = ref.Size();
 
 		// Copy elements
-		for (u64 index = 0; auto& obj : ref)
+		for (u64 index = 0; auto& elem : ref)
 		{
-			Construct<T>(m_Data + index, obj);
+			Construct<T>(m_Data + index, elem);
 			index++;
 		}
 	}
@@ -155,9 +155,9 @@ public:
 		m_Capacity = other.m_Capacity;
 
 		// Copy elements
-		for (u64 index = 0; auto& obj : other)
+		for (u64 index = 0; auto& elem : other)
 		{
-			Construct<T>(m_Data + index, obj);
+			Construct<T>(m_Data + index, elem);
 			index++;
 		}
 	}
@@ -177,9 +177,9 @@ public:
 	~Array()
 	{
 		// Destroy objects
-		for (auto& obj : *this)
+		for (auto& elem : *this)
 		{
-			obj.~T();
+			elem.~T();
 		}
 
 		m_Alloc->Deallocate(m_Data);
@@ -191,18 +191,18 @@ public:
 	Array& operator=(const Array& other)
 	{
 		// Destroy objects
-		for (auto& obj : *this)
+		for (auto& elem : *this)
 		{
-			obj->~T();
+			elem->~T();
 		}
 		m_Size = 0;
 		Realloc(other.m_Size);
 		m_Size = other.m_Size;
 
 		// Copy elements
-		for (u64 index = 0; auto& obj : other)
+		for (u64 index = 0; auto& elem : other)
 		{
-			Construct<T>(m_Data + index, obj);
+			Construct<T>(m_Data + index, elem);
 			index++;
 		}
 
@@ -260,9 +260,9 @@ public:
 	void Reserve(u64 size)
 	{
 		// Destroy objects
-		for (auto& obj : *this)
+		for (auto& elem : *this)
 		{
-			obj.~T();
+			elem.~T();
 		}
 		m_Size = 0;
 	}
@@ -295,7 +295,15 @@ public:
 	}
 
 	/// Clear the Array, destroying all elements.
-	void Clear();
+	void Clear()
+	{
+		for (auto& elem : *this)
+		{
+			elem.~T();
+		}
+
+		m_Size = 0;
+	}
 
 	/// Iteration.
 	///
@@ -337,9 +345,9 @@ private:
 			{
 				auto data = reinterpret_cast<T*>(m_Alloc->Allocate(capacity * sizeof(T)));
 				MemCopy(data, m_Data, m_Size * sizeof(T));
-				for (u64 i = 0; i < m_Size; i++)
+				for (u64 i = 0; auto& elem : *this)
 				{
-					Construct<T>(data + i, Move(m_Data[i]));
+					Construct<T>(data + i, Move(elem));
 				}
 				m_Alloc->Deallocate(m_Data);
 				m_Data = data;

@@ -14,14 +14,14 @@ namespace Ignis {
 /// \param destination Destination for the copy.
 /// \param source Source for the copy.
 /// \param size Number of bytes to copy.
-void MemCopy(void* destination, const void* source, u64 size);
+void IGNIS_API MemCopy(void* destination, const void* source, u64 size);
 
 /// Set all bytes to a specific value.
 ///
 /// \param destination Destination for the set.
 /// \param value Value to set each byte.
 /// \param size Number of bytes to set.
-void MemSet(void* destination, Byte value, u64 size);
+void IGNIS_API MemSet(void* destination, Byte value, u64 size);
 
 /// Compare two regions of memory.
 ///
@@ -30,7 +30,7 @@ void MemSet(void* destination, Byte value, u64 size);
 /// \param size Number of bytes to compare.
 ///
 /// \return If both regions of memory are equal.
-bool MemCompare(const void* first, const void* second, u64 size);
+bool IGNIS_API MemCompare(const void* first, const void* second, u64 size);
 
 /// Convert an object into an r-value reference.
 ///

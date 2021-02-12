@@ -4,8 +4,6 @@
 /// Don't include unless you're actually interacting with the OS.
 
 #pragma once
-
-#include "Core/Platform/Platform.h"
 #include "Core/Types/String.h"
 
 namespace Ignis {

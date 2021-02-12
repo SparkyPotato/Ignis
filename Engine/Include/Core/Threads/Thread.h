@@ -9,12 +9,12 @@
 namespace Ignis {
 
 /// Native thread object.
-class Thread
+class IGNIS_API Thread
 {
 public:
 	Thread() = default;
 
-	/// Create a thread, and immediately start it.
+	/// Create a thread, and immediately starts it.
 	///
 	/// \param threadFunction Function to run in the thread.
 	/// Callable object should last long enough for thread to start.

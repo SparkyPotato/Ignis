@@ -1,11 +1,8 @@
 # Editor-related files
 .vscode
 .vs
-*.sln
-*.vcxproj*
+CMakeSettings.json
 
 # Build results
-*Binaries*
-Docs/Build
+*Build*
 Docs/Source/API
-*Intermediate*

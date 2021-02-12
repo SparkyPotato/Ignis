@@ -15,7 +15,7 @@ class Atomic;
 
 /// Atomic unsigned 64-bit integer.
 template<>
-class Atomic<u64>
+class IGNIS_API Atomic<u64>
 {
 public:
 	Atomic() = default;
@@ -47,6 +47,6 @@ private:
 };
 
 /// Insert a memory barrier.
-void MemoryBlock();
+void IGNIS_API MemoryBlock();
 
 }

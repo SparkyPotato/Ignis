@@ -8,7 +8,7 @@
 namespace Ignis {
 
 /// Allocator that directly allocates system memory.
-class RawAllocator : public Allocator
+class IGNIS_API RawAllocator : public Allocator
 {
 public:
 	void* Allocate(u64 size) override;
@@ -17,6 +17,6 @@ public:
 };
 
 /// Global Raw Allocator for allocating memory directly on the heap.
-extern RawAllocator GAlloc;
+extern IGNIS_API RawAllocator GAlloc;
 
 }

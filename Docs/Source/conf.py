@@ -48,7 +48,7 @@ exhale_args = {
 	"doxygenStripFromPath":  "../../Engine",
 	"createTreeView":        True,
 	"exhaleExecutesDoxygen": True,
-	"exhaleDoxygenStdin":    "INPUT = ../../Engine/Source ENABLE_PREPROCESSING = YES"
+	"exhaleDoxygenStdin":    "INPUT = ../../Engine/Include"
 }
 
 primary_domain = "cpp"

@@ -7,7 +7,7 @@
 namespace Ignis {
 
 /// Reference to any type.
-class AnyRef
+class IGNIS_API AnyRef
 {
 public:
 	AnyRef() = default;

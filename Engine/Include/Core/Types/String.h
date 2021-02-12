@@ -14,12 +14,12 @@ namespace Ignis {
 /// \param ptr The pointer to the first element of the string.
 ///
 /// \return The number of bytes, EXCLUDING the null character.
-u64 StrLen(const char* ptr);
+u64 IGNIS_API StrLen(const char* ptr);
 
-class String;
+class IGNIS_API String;
 
 /// Iterator over a UTF-8 character sequence.
-class StringIterator
+class IGNIS_API StringIterator
 {
 public:
 	/// Construct an iterator over a byte sequence.
@@ -57,14 +57,17 @@ public:
 	StringIterator& operator+=(u64 offset);
 
 private:
-	friend bool operator==(StringIterator first, StringIterator second);
-	friend bool operator!=(StringIterator first, StringIterator second);
+	friend bool IGNIS_API operator==(StringIterator first, StringIterator second);
+	friend bool IGNIS_API operator!=(StringIterator first, StringIterator second);
 
 	const Byte* m_Byte;
 };
 
+bool IGNIS_API operator==(StringIterator first, StringIterator second);
+bool IGNIS_API operator!=(StringIterator first, StringIterator second);
+
 /// Non-owning view into a String or a UTF-8 encoded string literal.
-class StringRef
+class IGNIS_API StringRef
 {
 public:
 	/// Default constructor.
@@ -123,7 +126,7 @@ private:
 };
 
 /// Owning String with small-string optimization for storage of 23 characters.
-class String
+class IGNIS_API String
 {
 public:
 	/// Construct a String with an allocator.
@@ -234,8 +237,8 @@ public:
 	Iterator end() const;
 
 private:
-	friend bool operator==(const String& first, const String& second);
-	friend bool operator!=(const String& first, const String& second);
+	friend bool IGNIS_API operator==(const String& first, const String& second);
+	friend bool IGNIS_API operator != (const String& first, const String& second);
 
 	bool IsSmall() const;
 	void SetSmall(bool isSmall);
@@ -267,10 +270,7 @@ private:
 	} m_Repr;
 };
 
-bool operator==(const String& first, const String& second);
-bool operator!=(const String& first, const String& second);
-
-bool operator==(StringIterator first, StringIterator second);
-bool operator!=(StringIterator first, StringIterator second);
+bool IGNIS_API operator ==(const String& first, const String& second);
+bool IGNIS_API operator !=(const String& first, const String& second);
 
 }

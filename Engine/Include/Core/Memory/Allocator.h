@@ -9,7 +9,7 @@ namespace Ignis {
 
 /// Interface for all memory allocators.
 /// Every byte of heap memory MUST come from one of these.
-class Allocator
+class IGNIS_API Allocator
 {
 public:
 	virtual ~Allocator() = default;

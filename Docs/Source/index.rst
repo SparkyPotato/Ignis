@@ -1,4 +1,4 @@
-Ignis - A modular, high performance and modern interaction engine.
+Ignis - A modern, high performance interaction engine.
 ==================================================================
 
 .. toctree::

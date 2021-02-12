@@ -1,5 +1,5 @@
 /// Copyright (c) 2021 Shaye Garg.
-/// \file 
+/// \file
 /// Platform detection macros for conditional compilation.
 
 #pragma once
@@ -61,4 +61,12 @@
 #	endif
 #else
 #	error Unsupported compiler!
+#endif
+
+#ifdef PLATFORM_WINDOWS
+#	ifdef BUILD_IGNIS
+#		define IGNIS_API __declspec(dllexport)
+#	else
+#		define IGNIS_API __declspec(dllimport)
+#	endif
 #endif

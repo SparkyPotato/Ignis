@@ -3,8 +3,9 @@
 /// Base integral and character types.
 
 #pragma once
-
 #include <cstdint>
+
+#include "Core/Platform/Platform.h"
 
 namespace Ignis {
 
