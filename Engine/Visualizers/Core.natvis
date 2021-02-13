@@ -58,7 +58,7 @@
 		<DisplayString Condition="u64(m_Alloc) &amp; 1">{m_Repr.Small.Data, s8}</DisplayString>
 		<DisplayString Condition="!(u64(m_Alloc) &amp; 1)">{m_Repr.Big.Data, s8}</DisplayString>
 		<Expand>
-			<Item Name="Size" Condition="u64(m_Alloc) &amp; 1">m_SmallSize - m_Repr.Small.Data[m_SmallSize]</Item>
+			<Item Name="Size" Condition="u64(m_Alloc) &amp; 1">m_SmallSize - m_Repr.Small.Data[m_SmallSize].Data</Item>
 			<Item Name="Capacity" Condition="u64(m_Alloc) &amp; 1">m_SmallSize</Item>
 			<Item Name="Size" Condition="!(u64(m_Alloc) &amp; 1)">m_Repr.Big.Size</Item>
 			<Item Name="Capacity" Condition="!(u64(m_Alloc) &amp; 1)">m_Repr.Big.Capacity</Item>

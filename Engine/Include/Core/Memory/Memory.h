@@ -5,7 +5,7 @@
 #pragma once
 #include <new> // Because self-defining placement new doesn't work with MSVC. How lovely.
 
-#include "Core/Types/BaseTypes.h"
+#include "Core/Memory/RawAllocator.h"
 
 namespace Ignis {
 
@@ -49,11 +49,38 @@ T&& Move(T&& object)
 /// \param at Location to construct the object.
 /// \param args Arguments to pass to the constructor.
 ///
-/// \return Reference to the constructed object.
+/// \return Pointer to the constructed object.
 template<typename T, typename... Args>
 T* Construct(void* at, Args&&... args)
 {
 	return new (at) T(static_cast<Args&&>(args)...);
+}
+
+/// Allocate memory for an object from an allocator, and construct it.
+///
+/// \tparam T Type of object to construct.
+/// \param args Arguments to pass to the constructor.
+/// \param alloc Allocator to use.
+///
+/// \return Pointer to the constructed object.
+template<typename T, typename... Args>
+T* New(Args&&... args, Allocator& alloc = GAlloc)
+{
+	auto ptr = alloc.Allocate(sizeof(Allocator*) + sizeof(T));
+	ptr = &alloc;
+	return Construct<T>(reinterpret_cast<Allocator*>(ptr) + 1, static_cast<Args&&>(args)...);
+}
+
+/// Delete an object allocated with New<T>().
+///
+/// \tparam T Type of the object.
+/// \param object Object to delete. MUST have been New<T>()ed.
+template<typename T>
+void Delete(T* object)
+{
+	object->~T();
+	auto ptr = reinterpret_cast<Allocator*>(object) - 1;
+	ptr->Deallocate(ptr + 1);
 }
 
 }

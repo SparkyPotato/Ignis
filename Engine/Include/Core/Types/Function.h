@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Core/Types/BaseTypes.h"
+#include "Core/Misc/Assert.h"
 
 namespace Ignis {
 
@@ -86,7 +87,7 @@ public:
 	/// \return Return value of the call.
 	Ret operator()(Args... args) const
 	{
-		// TODO: ASSERT(m_Callable, "FunctionRef is unbound");
+		IASSERT(m_Callable, "FunctionRef is unbound");
 		return m_Callable->Invoke(static_cast<Args&&>(args)...);
 	}
 

@@ -1,6 +1,6 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Core/Platform/Internals.h"
+#include "Platform/Internals.h"
 
 #ifdef PLATFORM_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -9,6 +9,8 @@
 
 namespace Ignis {
 namespace PlatformInternals {
+
+#ifdef PLATFORM_WINDOWS
 
 String ConvToUTF8(wchar_t* utf16str)
 {
@@ -27,6 +29,30 @@ String ConvToUTF16(StringRef utf8str)
 		reinterpret_cast<wchar_t*>(str.Data()), int(str.Size() + 1));
 	return str;
 }
+
+void DebugBreak() { __debugbreak(); }
+
+void DebugOutput(StringRef message)
+{
+	OutputDebugStringW(reinterpret_cast<const wchar_t*>(ConvToUTF16(message).CString()));
+}
+
+#else
+
+void DebugBreak()
+{
+#	ifdef ARCH_X64
+	__asm__ volatile("int $0x03");
+#	elif defined(ARCH_ARM)
+#		ifdef PLATFORM_MAC
+	__builtin_trap();
+#		else
+	__asm__ volatile(".inst 0xd4200000");
+#		endif
+#	endif
+}
+
+#endif
 
 }
 }

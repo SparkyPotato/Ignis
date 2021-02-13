@@ -3,6 +3,7 @@
 #include "Core/Types/String.h"
 
 #include "Core/Memory/Memory.h"
+#include "Core/Misc/Assert.h"
 
 namespace Ignis {
 
@@ -36,7 +37,7 @@ Char StringIterator::operator*() const
 	}
 	else
 	{
-		// TODO: ASSERT("Invalid byte");
+		IASSERT(false, "Invalid byte");
 		return 0xfffd;
 	}
 }
@@ -45,7 +46,7 @@ StringIterator& StringIterator::operator++()
 {
 	if ((*m_Byte & 0b11000000) == 0b10000000) // 10xxxxxx
 	{
-		// TODO: ASSERT("Inside codepoint");
+		IASSERT(false, "Inside codepoints");
 	}
 	else if ((*m_Byte & 0b10000000) == 0) // 0xxxxxxx
 	{
@@ -65,7 +66,7 @@ StringIterator& StringIterator::operator++()
 	}
 	else
 	{
-		// TODO: ASSERT("Invalid byte");
+		IASSERT(false, "Invalid byte");
 	}
 
 	return *this;
@@ -284,6 +285,7 @@ String String::operator+(const char* ptr)
 
 	MemCopy(temp.Data(), Data(), Size());
 	MemCopy(temp.Data() + Size(), ptr, ptrSize);
+	temp.Data()[temp.Size()] = '\0';
 
 	return temp;
 }
@@ -294,6 +296,7 @@ String String::operator+(StringRef view)
 
 	MemCopy(temp.Data(), Data(), Size());
 	MemCopy(temp.Data() + Size(), view.Data(), view.Size());
+	temp.Data()[temp.Size()] = '\0';
 
 	return temp;
 }
@@ -334,6 +337,10 @@ String& String::Push(Char c)
 		Data()[currSize + 2] = 0b10000000 + ((c & 0b111111000000) >> 6);
 		Data()[currSize + 3] = 0b10000000 + (c & 0b111111);
 		Data()[currSize + 4] = '\0';
+	}
+	else
+	{
+		IASSERT(false, "Invalid codepoint");
 	}
 
 	return *this;
@@ -462,5 +469,11 @@ bool operator!=(const String& first, const String& second) { return !(first == s
 bool operator==(StringIterator first, StringIterator second) { return first.m_Byte == second.m_Byte; }
 
 bool operator!=(StringIterator first, StringIterator second) { return first.m_Byte != second.m_Byte; }
+
+String IGNIS_API operator+(StringRef first, StringRef second)
+{
+	String str(first);
+	return str + second;
+}
 
 }

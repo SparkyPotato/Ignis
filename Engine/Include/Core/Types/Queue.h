@@ -3,7 +3,7 @@
 /// Queues.
 
 #pragma once
-#include "Core/Threads/Atomic.h"
+#include <atomic>
 
 namespace Ignis {
 
@@ -85,8 +85,8 @@ public:
 private:
 	T* m_Data;
 	u64 m_Size;
-	u64 m_Top = 0;
-	u64 m_Bottom = 0;
+	std::atomic<u64> m_Top = 0;
+	std::atomic<u64> m_Bottom = 0;
 	u64 m_Mask;
 };
 

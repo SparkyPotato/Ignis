@@ -18,15 +18,8 @@
 #	else
 #		error macOS is the only supported Apple platform!
 #	endif
-#elif defined(__unix__) || defined(__unix)
-#	include <unistd.h>
-#	ifdef __CYGWIN__
-#		error Cygwin is not supported!
-#	elif defined(_POSIX_VERSION)
-#		define PLATFORM_POSIX
-#	else
-#		error Spark requires POSIX support!
-#	endif
+#elif defined(__linux__)
+#	define PLATFORM_LINUX
 #else
 #	error Unknown OS!
 #endif
@@ -34,6 +27,15 @@
 // Compiler and architecture detection
 #ifdef _MSC_VER
 #	define COMPILER_MSVC
+#	ifdef _M_X64
+#		define ARCH_X64
+#	elif _M_ARM64
+#		define ARCH_ARM
+#	else
+#		error Unsupported CPU architecture!
+#	endif
+#elif __clang__
+#	define COMPILER_CLANG
 #	ifdef _M_X64
 #		define ARCH_X64
 #	elif _M_ARM64
@@ -50,15 +52,6 @@
 #	else
 #		error Unsupported CPU architecture!
 #	endif
-#elif __clang__
-#	define COMPILER_CLANG
-#	ifdef _M_X64
-#		define ARCH_X64
-#	elif _M_ARM64
-#		define ARCH_ARM
-#	else
-#		error Unsupported CPU architecture!
-#	endif
 #else
 #	error Unsupported compiler!
 #endif
@@ -69,4 +62,6 @@
 #	else
 #		define IGNIS_API __declspec(dllimport)
 #	endif
+#else
+#	define IGNIS_API
 #endif

@@ -94,7 +94,7 @@ public:
 	/// Append a StringRef.
 	///
 	/// \param ref StringRef to append.
-	/// 
+	///
 	/// \return String containing the concatenated string.
 	String operator+(StringRef ref) const;
 
@@ -182,9 +182,9 @@ public:
 	/// \param ptr Pointer to first character of string literal to append.
 	String& operator+=(const char* ptr);
 
-	/// Append a StringView.
+	/// Append a StringRef.
 	///
-	/// \param view StringView to append.
+	/// \param view StringRef to append.
 	String& operator+=(StringRef view);
 
 	/// Append a string literal.
@@ -192,9 +192,9 @@ public:
 	/// \param ptr Pointer to first character of string literal to append.
 	String operator+(const char* ptr);
 
-	/// Append a StringView.
+	/// Append a StringRef.
 	///
-	/// \param view StringView to append.
+	/// \param view StringRef to append.
 	String operator+(StringRef view);
 
 	/// Append a UTF-32 codepoint into the String.
@@ -238,7 +238,7 @@ public:
 
 private:
 	friend bool IGNIS_API operator==(const String& first, const String& second);
-	friend bool IGNIS_API operator != (const String& first, const String& second);
+	friend bool IGNIS_API operator!=(const String& first, const String& second);
 
 	bool IsSmall() const;
 	void SetSmall(bool isSmall);
@@ -270,7 +270,9 @@ private:
 	} m_Repr;
 };
 
-bool IGNIS_API operator ==(const String& first, const String& second);
-bool IGNIS_API operator !=(const String& first, const String& second);
+bool IGNIS_API operator==(const String& first, const String& second);
+bool IGNIS_API operator!=(const String& first, const String& second);
+
+String IGNIS_API operator+(StringRef first, StringRef second);
 
 }
