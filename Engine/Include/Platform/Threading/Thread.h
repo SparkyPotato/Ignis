@@ -17,8 +17,7 @@ public:
 	/// Create a thread, and immediately starts it.
 	///
 	/// \param threadFunction Function to run in the thread.
-	/// Callable object should last long enough for thread to start.
-	Thread(FunctionRef<void()> threadFunction);
+	Thread(Function<void()> threadFunction);
 
 	~Thread();
 

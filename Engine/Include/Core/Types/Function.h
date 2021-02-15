@@ -3,101 +3,217 @@
 /// Type-erased bound functions.
 
 #pragma once
-#include "Core/Types/BaseTypes.h"
+#include "Core/Memory/Memory.h"
+#include "Core/Memory/RawAllocator.h"
 #include "Core/Misc/Assert.h"
 
 namespace Ignis {
 
+namespace Private {
+
+template<typename>
+class Callable;
+
+/// Base for all callable objects.
+///
+/// \tparam Ret Return value of the function.
+/// \tparam Args Arguments for the function.
+template<typename Ret, typename... Args>
+class Callable<Ret(Args...)>
+{
+public:
+	/// Destructor.
+	virtual ~Callable() {}
+
+	/// Invoke the callable object.
+	///
+	/// \param args Arguments to the callable.
+	///
+	/// \return Ret Return value.
+	virtual Ret Invoke(Args&&... args) const = 0;
+
+	/// Clone the callable object.
+	///
+	/// \param at Pointer to allocate the callable at.
+	/// \param size Size of the memory region, in bytes.
+	/// \param alloc Allocator to use to allocate memory for the callable if it does not fit in size bytes.
+	///
+	/// \return Pointer to the allocated callable. Free with Delete() if not equal to at.
+	virtual Callable* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const = 0;
+};
+
+template<typename, typename>
+class FCallable;
+
+/// Concrete callable type that holds anything with an operator().
+///
+/// \tparam T The type of the functor.
+template<typename Ret, typename... Args, typename T>
+class FCallable<Ret(Args...), T> : public Callable<Ret(Args...)>
+{
+public:
+	FCallable(const T& callable) : m_Callable(callable) {}
+	FCallable(T&& callable) : m_Callable(Move(callable)) {}
+
+	Ret Invoke(Args&&... args) const override { return m_Callable(static_cast<Args&&>(args)...); }
+
+	Callable<Ret(Args...)>* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const override
+	{
+		if (size >= sizeof(*this))
+		{
+			return Construct<FCallable<Ret(Args...), T>>(at, m_Callable);
+		}
+
+		return New<FCallable<Ret(Args...), T>>(alloc, m_Callable);
+	}
+
+private:
+	T m_Callable;
+};
+
+template<typename, typename>
+class MCallable;
+
+/// Concrete callable type that holds a member function and a pointer to the object to call the function on.
+///
+/// \tparam T Class to call the member function on.
+template<typename Ret, typename... Args, typename T>
+class MCallable<Ret(Args...), T> : public Callable<Ret(Args...)>
+{
+public:
+	MCallable(Ret (T::*function)(Args...), T* object) : m_Object(object), m_Function(function) {}
+
+	Ret Invoke(Args&&... args) const override
+	{
+		IASSERT(m_Object && m_Function, "MCallable is unbound!");
+		return (m_Object->*m_Function)(static_cast<Args&&>(args)...);
+	}
+
+	Callable<Ret(Args...)>* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const override
+	{
+		if (size >= sizeof(*this))
+		{
+			return Construct<MCallable<Ret(Args...), T>>(at, m_Function, m_Object);
+		}
+
+		return New<MCallable<Ret(Args...), T>>(alloc, m_Function, m_Object);
+	}
+
+private:
+	T* m_Object;
+	Ret (T::*m_Function)(Args...);
+};
+
+}
+
 template<typename>
 class FunctionRef;
 
-/// Reference to a callable object. Does not support mutable lambdas.
 template<typename Ret, typename... Args>
 class FunctionRef<Ret(Args...)>
 {
 public:
-	/// Type eraser for callable objects.
-	class Callable
-	{
-	public:
-		virtual ~Callable() = default;
-
-		/// Invoke the callable object.
-		///
-		/// \param args Arguments to the invocation.
-		/// 
-		/// \return The return value of the call.
-		virtual Ret Invoke(Args... args) const = 0;
-	};
-
-	/// Callable object for lambdas, functions pointers, and functors.
-	/// Does not copy the object.
-	template<typename T>
-	class CallableObject : public Callable
-	{
-	public:
-		/// Construct a CallableObject from any callable object.
-		CallableObject(const T& callable) : m_Callable(callable) {}
-
-		Ret Invoke(Args... args) const override { return m_Callable(static_cast<Args&&>(args)...); }
-
-	private:
-		const T& m_Callable;
-	};
-
-	/// Callable for member functions. 
-	/// Does not copy the object.
-	/// 
-	/// \tparam C Class or struct of member function.
-	template<typename C>
-	class MemberFunction : public Callable
-	{
-	public:
-		/// Construct a MemberFunction from an object and function.
-		///
-		/// \param obj Pointer to object to call the function on.
-		/// \param func Function to call.
-		MemberFunction(C* obj, Ret (C::*func)(Args&&...)) : m_Function(func), m_Obj(obj) {}
-
-		Ret Invoke(Args... args) const override { return ((m_Obj)->*(m_Function))(static_cast<Args&&>(args)...); }
-
-	private:
-		Ret (C::*m_Function)(Args...);
-		C* m_Obj;
-	};
-
-	/// Construct an unbound FunctionRef.
 	FunctionRef() = default;
+	FunctionRef(const Private::Callable<Ret(Args...)>& callable) : m_Callable(&callable) {}
 
-	/// Construct a FunctionRef to reference a callable.
-	///
-	/// \param callable Callable object to invoke.
-	FunctionRef(const Callable& callable) { m_Callable = &callable; }
-
-	template<typename C>
-	FunctionRef& operator=(const Callable& callable)
-	{
-		m_Callable = &callable;
-	}
-
-	/// Invoke the enclosed callable reference.
-	///
-	/// \param args Arguments to invoke with.
-	/// 
-	/// \return Return value of the call.
 	Ret operator()(Args... args) const
 	{
-		IASSERT(m_Callable, "FunctionRef is unbound");
-		return m_Callable->Invoke(static_cast<Args&&>(args)...);
+		IASSERT(m_Callable, "FunctionRef is unbound!");
+		return m_Callable->Invoke(args...);
 	}
 
-	/// Check if the FunctionRef is valid.
-	///
-	/// \return If the FunctionRef is valid.
-	operator bool() const { return m_Callable; }
+private:
+	const Private::Callable<Ret(Args...)>* m_Callable = nullptr;
+};
+
+template<typename>
+class Function;
+
+template<typename Ret, typename... Args>
+class Function<Ret(Args...)>
+{
+public:
+	template<typename T>
+	Function(const T& callable, Allocator& alloc = GAlloc)
+	{
+		if (sizeof(T) > sizeof(m_Repr))
+		{
+			m_Repr.External = New<Private::FCallable<Ret(Args...), T>>(alloc, callable);
+		}
+		else
+		{
+			m_IsSmall = true;
+			Construct<Private::FCallable<Ret(Args...), T>>(m_Repr.Internal, callable);
+		}
+	}
+
+	template<typename T>
+	Function(Ret (T::*function)(Args...), T* object, Allocator& alloc = GAlloc)
+	{
+		if (sizeof(T) > sizeof(m_Repr))
+		{
+			m_Repr.External = New<Private::MCallable<Ret(Args...), T>>(alloc, function, object);
+		}
+		else
+		{
+			m_IsSmall = true;
+			Construct<Private::MCallable<Ret(Args...), T>>(m_Repr.Internal, function, object);
+		}
+	}
+
+	Function(Function<Ret(Args...)>&& other)
+	{
+		m_Repr = other.m_Repr;
+		m_IsSmall = other.m_IsSmall;
+		other.m_IsSmall = true;
+	}
+
+	Function(const Function<Ret(Args...)>& other, Allocator& alloc = GAlloc)
+	{
+		auto callable = other.GetCallable()->Clone(m_Repr.Internal, sizeof(m_Repr), alloc);
+		if (callable == reinterpret_cast<Private::Callable<Ret(Args...)>*>(m_Repr.Internal))
+		{
+			m_IsSmall = true;
+		}
+		else
+		{
+			m_Repr.External = callable;
+		}
+	}
+
+	~Function()
+	{
+		if (!m_IsSmall)
+		{
+			Delete(m_Repr.External);
+		}
+	}
+
+	Ret operator()(Args... args)
+	{
+		IASSERT(GetCallable(), "Function is unbound!");
+		return GetCallable()->Invoke(args...);
+	}
 
 private:
-	const Callable* m_Callable = nullptr;
+	const Private::Callable<Ret(Args...)>* GetCallable() const
+	{
+		if (m_IsSmall)
+		{
+			return reinterpret_cast<const Private::Callable<Ret(Args...)>*>(m_Repr.Internal);
+		}
+		else
+		{
+			return m_Repr.External;
+		}
+	}
+
+	union
+	{
+		u64 Internal[3];
+		Private::Callable<Ret(Args...)>* External = nullptr;
+	} m_Repr;
+	bool m_IsSmall = false;
 };
 
 }

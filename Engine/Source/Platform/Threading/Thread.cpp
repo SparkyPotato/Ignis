@@ -1,6 +1,6 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Platform/Thread.h"
+#include "Platform/Threading/Thread.h"
 
 #include "Core/Platform.h"
 #include "Platform/Internals.h"
@@ -13,7 +13,7 @@ namespace Ignis {
 
 struct ThreadData
 {
-	FunctionRef<void()> Function;
+	Function<void()> Func;
 	HANDLE StartSemaphore;
 };
 
@@ -23,12 +23,12 @@ static DWORD ThreadProc(void* arg)
 	auto data = *reinterpret_cast<ThreadData*>(arg);
 	ReleaseSemaphore(data.StartSemaphore, 1, nullptr);
 
-	data.Function();
+	data.Func();
 
 	return 0;
 }
 
-Thread::Thread(FunctionRef<void()> threadFunction)
+Thread::Thread(Function<void()> threadFunction)
 {
 	ThreadData data{ threadFunction, CreateSemaphoreW(nullptr, 0, 1, nullptr) };
 
@@ -46,8 +46,13 @@ Thread::Thread(FunctionRef<void()> threadFunction)
 
 Thread::~Thread()
 {
-	TerminateThread(m_PlatformHandle, 0);
-	CloseHandle(m_PlatformHandle);
+	DWORD exit;
+	GetExitCodeThread(m_PlatformHandle, &exit);
+	if (exit == STILL_ACTIVE) 
+	{
+		TerminateThread(m_PlatformHandle, 0);
+		CloseHandle(m_PlatformHandle);
+	}
 }
 
 void Thread::Join() { WaitForSingleObject(m_PlatformHandle, INFINITE); }
@@ -76,32 +81,32 @@ u16 Thread::GetMaxThreads()
 
 #else
 
+#	include<atomic>
 #	include <pthread.h>
-#	include <semaphore.h>
 #	include <sys/sysinfo.h>
 
 namespace Ignis {
 
 struct ThreadData
 {
-	FunctionRef<void()> Function;
-	sem_t StartSemaphore;
+	Function<void()> Func;
+	std::atomic<u64> StartSemaphore;
 };
 
 static void* ThreadFunction(void* arg)
 {
-	auto data = *reinterpret_cast<ThreadData*>(arg);
-	sem_post(&data.StartSemaphore);
+	auto data = reinterpret_cast<ThreadData*>(arg);
+	auto func = data->Func;
+	data->StartSemaphore--;
 
-	data.Function();
+	func();
 
 	return nullptr;
 }
 
-Thread::Thread(FunctionRef<void()> threadFunction)
+Thread::Thread(Function<void()> threadFunction)
 {
-	ThreadData data{ threadFunction, 0 };
-	sem_init(&data.StartSemaphore, 0, -1);
+	ThreadData data{ threadFunction, 1 };
 
 	pthread_create(reinterpret_cast<pthread_t*>(&m_PlatformHandle), nullptr, ThreadFunction, &data);
 	if (!m_PlatformHandle)
@@ -110,8 +115,7 @@ Thread::Thread(FunctionRef<void()> threadFunction)
 	}
 
 	// Wait until ThreadProc has gotten a copy of the required data
-	sem_wait(&data.StartSemaphore);
-	sem_destroy(&data.StartSemaphore);
+	while (data.StartSemaphore > 0) {}
 }
 
 Thread::~Thread()

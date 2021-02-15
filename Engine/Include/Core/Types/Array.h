@@ -257,15 +257,7 @@ public:
 	/// Reserve space in the Array.
 	///
 	/// \param size The number of elements to reserve space for.
-	void Reserve(u64 size)
-	{
-		// Destroy objects
-		for (auto& elem : *this)
-		{
-			elem.~T();
-		}
-		m_Size = 0;
-	}
+	void Reserve(u64 size) { Realloc(size); }
 
 	/// Push a copy of an object into the end of the Array.
 	///

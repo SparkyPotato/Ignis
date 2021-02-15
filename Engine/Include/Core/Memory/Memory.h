@@ -59,12 +59,12 @@ T* Construct(void* at, Args&&... args)
 /// Allocate memory for an object from an allocator, and construct it.
 ///
 /// \tparam T Type of object to construct.
-/// \param args Arguments to pass to the constructor.
 /// \param alloc Allocator to use.
+/// \param args Arguments to pass to the constructor.
 ///
 /// \return Pointer to the constructed object.
 template<typename T, typename... Args>
-T* New(Args&&... args, Allocator& alloc = GAlloc)
+T* New(Allocator& alloc, Args&&... args)
 {
 	auto ptr = alloc.Allocate(sizeof(Allocator*) + sizeof(T));
 	ptr = &alloc;

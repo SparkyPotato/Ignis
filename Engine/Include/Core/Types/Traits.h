@@ -11,10 +11,14 @@ namespace Ignis {
 
 namespace Traits {
 
+namespace Private {
+
 /// Helper for IsComplete.
 template<typename T, u64 = sizeof(T)>
 std::bool_constant<true> IsCompleteHelper(T*);	   // Undefined because only used in decltype.
 std::bool_constant<false> IsCompleteHelper(void*); // Undefined because only used in decltype.
+
+}
 
 /// Checking if a type is complete.
 /// Is Constant<bool, true> if the type is complete.
@@ -22,7 +26,7 @@ std::bool_constant<false> IsCompleteHelper(void*); // Undefined because only use
 ///
 /// \tparam T Type to check.
 template<typename T>
-using IsComplete = decltype(IsCompleteHelper((T*) nullptr));
+using IsComplete = decltype(Private::IsCompleteHelper((T*) nullptr));
 
 }
 

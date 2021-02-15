@@ -1,13 +1,15 @@
 /// Copyright (c) 2021 Shaye Garg.
 
 #include "Platform/Entry.h"
-#include "Core/Types/Function.h"
+#include "Job/JobSystem.h"
 
 using namespace Ignis;
 
-int Entry(Ignis::StringRef invocation, Ignis::ArrayRef<Ignis::StringRef> arguments) 
+int Entry(StringRef invocation, ArrayRef<StringRef> arguments) 
 {
-	
+	JobSystem::Initialize(0, 256);
+
+	JobSystem::Quit();
 
 	return 0; 
 }

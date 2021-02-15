@@ -470,7 +470,7 @@ bool operator==(StringIterator first, StringIterator second) { return first.m_By
 
 bool operator!=(StringIterator first, StringIterator second) { return first.m_Byte != second.m_Byte; }
 
-String IGNIS_API operator+(StringRef first, StringRef second)
+String operator+(StringRef first, StringRef second)
 {
 	String str(first);
 	return str + second;

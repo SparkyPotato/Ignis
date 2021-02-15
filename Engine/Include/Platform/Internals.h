@@ -29,8 +29,8 @@ String IGNIS_API ConvToUTF16(StringRef utf8str);
 
 #endif
 
-void DebugBreak();
-void DebugOutput(StringRef message);
+void IGNIS_API DebugBreak();
+void IGNIS_API DebugOutput(StringRef message);
 
 }
 }
