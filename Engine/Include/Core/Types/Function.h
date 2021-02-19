@@ -30,7 +30,7 @@ public:
 	/// \param args Arguments to the callable.
 	///
 	/// \return Ret Return value.
-	virtual Ret Invoke(Args&&... args) const = 0;
+	virtual Ret Invoke(Args... args) const = 0;
 
 	/// Clone the callable object.
 	///
@@ -55,7 +55,7 @@ public:
 	FCallable(const T& callable) : m_Callable(callable) {}
 	FCallable(T&& callable) : m_Callable(Move(callable)) {}
 
-	Ret Invoke(Args&&... args) const override { return m_Callable(static_cast<Args&&>(args)...); }
+	Ret Invoke(Args... args) const override { return m_Callable(args...); }
 
 	Callable<Ret(Args...)>* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const override
 	{
@@ -83,10 +83,10 @@ class MCallable<Ret(Args...), T> : public Callable<Ret(Args...)>
 public:
 	MCallable(Ret (T::*function)(Args...), T* object) : m_Object(object), m_Function(function) {}
 
-	Ret Invoke(Args&&... args) const override
+	Ret Invoke(Args... args) const override
 	{
 		IASSERT(m_Object && m_Function, "MCallable is unbound!");
-		return (m_Object->*m_Function)(static_cast<Args&&>(args)...);
+		return (m_Object->*m_Function)(args...);
 	}
 
 	Callable<Ret(Args...)>* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const override
@@ -116,11 +116,19 @@ public:
 	FunctionRef() = default;
 	FunctionRef(const Private::Callable<Ret(Args...)>& callable) : m_Callable(&callable) {}
 
+	FunctionRef<Ret(Args...)>& operator=(const Private::Callable<Ret(Args...)>& callable)
+	{
+		m_Callable = &callable;
+		return *this;
+	}
+
 	Ret operator()(Args... args) const
 	{
 		IASSERT(m_Callable, "FunctionRef is unbound!");
 		return m_Callable->Invoke(args...);
 	}
+
+	const Private::Callable<Ret(Args...)>* GetCallable() { return m_Callable; }
 
 private:
 	const Private::Callable<Ret(Args...)>* m_Callable = nullptr;
@@ -215,5 +223,11 @@ private:
 	} m_Repr;
 	bool m_IsSmall = false;
 };
+
+template<typename Ret, typename... Args, typename T>
+Private::FCallable<Ret(Args...), T> Bind(const T& callable)
+{
+	return Private::FCallable<Ret(Args...), T>(callable);
+}
 
 }

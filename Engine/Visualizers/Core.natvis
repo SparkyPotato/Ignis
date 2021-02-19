@@ -41,17 +41,10 @@
 		<DisplayString>{m_Callable}</DisplayString>
 		<Expand></Expand>
 	</Type>
-
+	
 	<Type Name="Ignis::RawAllocator">
 		<DisplayString>Raw Allocator</DisplayString>
 		<Expand></Expand>
-	</Type>
-
-	<Type Name="Ignis::StealQueue&lt;*&gt;">
-		<DisplayString>Size = {m_Bottom - m_Top}</DisplayString>
-		<Expand>
-			<Item Name="Capacity">m_Size</Item>
-		</Expand>
 	</Type>
 	
 	<Type Name="Ignis::String">

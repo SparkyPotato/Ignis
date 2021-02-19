@@ -67,7 +67,7 @@ template<typename T, typename... Args>
 T* New(Allocator& alloc, Args&&... args)
 {
 	auto ptr = alloc.Allocate(sizeof(Allocator*) + sizeof(T));
-	ptr = &alloc;
+	*reinterpret_cast<Allocator**>(ptr) = &alloc;
 	return Construct<T>(reinterpret_cast<Allocator*>(ptr) + 1, static_cast<Args&&>(args)...);
 }
 

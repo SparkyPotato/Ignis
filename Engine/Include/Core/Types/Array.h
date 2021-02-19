@@ -5,6 +5,7 @@
 #pragma once
 #include "Core/Memory/Memory.h"
 #include "Core/Memory/RawAllocator.h"
+#include "Core/Misc/Assert.h"
 
 namespace Ignis {
 
@@ -35,14 +36,22 @@ public:
 	/// \param index The index of the element to access.
 	///
 	/// \return The element.
-	T& operator[](u64 index) { return m_Data[index]; }
+	T& operator[](u64 index)
+	{
+		IASSERT(index < m_Size, "Out of bounds access in ArrayRef");
+		return m_Data[index];
+	}
 
 	/// Index.
 	///
 	/// \param index The index of the element to access.
 	///
 	/// \return The element.
-	const T& operator[](u64 index) const { return m_Data[index]; }
+	const T& operator[](u64 index) const
+	{
+		IASSERT(index < m_Size, "Out of bounds access in ArrayRef");
+		return m_Data[index];
+	}
 
 	/// Get the size of the view.
 	///
@@ -176,6 +185,11 @@ public:
 	/// Destructor.
 	~Array()
 	{
+		if (!m_Data)
+		{
+			return;
+		}
+
 		// Destroy objects
 		for (auto& elem : *this)
 		{
@@ -193,7 +207,7 @@ public:
 		// Destroy objects
 		for (auto& elem : *this)
 		{
-			elem->~T();
+			elem.~T();
 		}
 		m_Size = 0;
 		Realloc(other.m_Size);
@@ -230,14 +244,22 @@ public:
 	/// \param index The index of the element to access.
 	///
 	/// \return The element.
-	T& operator[](u64 index) { return m_Data[index]; }
+	T& operator[](u64 index)
+	{
+		IASSERT(index < m_Size, "Out of bounds access in Array");
+		return m_Data[index];
+	}
 
 	/// Index.
 	///
 	/// \param index The index of the element to access.
 	///
 	/// \return The element.
-	const T& operator[](u64 index) const { return m_Data[index]; }
+	const T& operator[](u64 index) const
+	{
+		IASSERT(index < m_Size, "Out of bounds access in Array");
+		return m_Data[index];
+	}
 
 	/// Get the first element of the Array.
 	///

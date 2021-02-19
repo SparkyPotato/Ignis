@@ -2,52 +2,9 @@
 
 #include "Job/Fiber.h"
 
-#include <immintrin.h>
-#include <stdio.h>
-
 namespace Ignis {
 
 #ifdef PLATFORM_WINDOWS
-
-/// Callee preserved registers on Microsoft ABI.
-/// DO NOT change without editing all ___MS.asm.
-struct FiberContext
-{
-	void* rip = nullptr;
-	void* rsp = nullptr;
-	u64 rbx = 0, rbp = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0, rdi = 0, rsi = 0;
-	__m128i xmm6, xmm7, xmm8, xmm9, xmm10, xmm11, xmm12, xmm13, xmm14, xmm15;
-};
-
-// Precompiled code for getting the current thread's context.
-// DO NOT change without changing GetContextMS.asm as well.
-#	pragma section(".text")
-__declspec(allocate(".text")) static u8 GetContextCode[] = {
-	0x4c, 0x8b, 0x04, 0x24,							//
-	0x4c, 0x89, 0x01,								//
-	0x4c, 0x8d, 0x44, 0x24, 0x08,					//
-	0x4c, 0x89, 0x41, 0x08,							//
-	0x48, 0x89, 0x59, 0x10,							//
-	0x48, 0x89, 0x69, 0x18,							//
-	0x4c, 0x89, 0x61, 0x20,							//
-	0x4c, 0x89, 0x69, 0x28,							//
-	0x4c, 0x89, 0x71, 0x30,							//
-	0x4c, 0x89, 0x79, 0x38,							//
-	0x4c, 0x89, 0x79, 0x40,							//
-	0x4c, 0x89, 0x71, 0x48,							//
-	0x0f, 0x11, 0x71, 0x50,							//
-	0x0f, 0x11, 0x79, 0x60,							//
-	0x44, 0x0f, 0x11, 0x41, 0x70,					//
-	0x44, 0x0f, 0x11, 0x89, 0x80, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0x91, 0x90, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0x99, 0xa0, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0xa1, 0xb0, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0xa9, 0xc0, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0xb1, 0xd0, 0x00, 0x00, 0x00, //
-	0x44, 0x0f, 0x11, 0xb9, 0xe0, 0x00, 0x00, 0x00, //
-	0x31, 0xc0,										//
-	0xc3											//
-};
 
 // Precompiled code for setting the current thread's context.
 // DO NOT change without changing SwapContextMS.asm as well.
@@ -100,45 +57,10 @@ __declspec(allocate(".text")) static u8 SwapContextCode[] = {
 	0xc3											//
 };
 
-/// Get the current thread's context.
-///
-/// \param context Variable to store the thread's context in.
-static void (*GetContext)(FiberContext* context) = reinterpret_cast<void (*)(FiberContext*)>(&(*GetContextCode));
-
-/// Set the current thread's context.
-///
-/// \param from Context to swap from.
-/// \param to Context to swap to.
-static void (*SwapContext)(FiberContext* from,
-	FiberContext* to) = reinterpret_cast<void (*)(FiberContext*, FiberContext*)>(&(*SwapContextCode));
+void (*SwapContext)(FiberContext* from, FiberContext* to) = reinterpret_cast<void (*)(FiberContext*, FiberContext*)>(
+	&(*SwapContextCode));
 
 #else
-
-/// Callee preserved registers on SysV ABI.
-/// DO NOT change without editing all ___SysV.asm.
-struct FiberContext
-{
-	void* rip = nullptr;
-	void* rsp = nullptr;
-	u64 rbx = 0, rbp = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
-};
-
-// Precompiled code for getting the current thread's context.
-// DO NOT change without changing GetContextSysV.asm as well.
-__attribute__((section(".text#"))) static u8 GetContextCode[] = {
-	0x4c, 0x8b, 0x04, 0x24,		  //
-	0x4c, 0x89, 0x07,			  //
-	0x4c, 0x8d, 0x44, 0x24, 0x08, //
-	0x4c, 0x89, 0x47, 0x08,		  //
-	0x48, 0x89, 0x5f, 0x10,		  //
-	0x48, 0x89, 0x6f, 0x18,		  //
-	0x4c, 0x89, 0x67, 0x20,		  //
-	0x4c, 0x89, 0x6f, 0x28,		  //
-	0x4c, 0x89, 0x77, 0x30,		  //
-	0x4c, 0x89, 0x7f, 0x38,		  //
-	0x31, 0xc0,					  //
-	0xc3						  //
-};
 
 // Precompiled code for setting the current thread's context.
 // DO NOT change without changing SwapContextSysV.asm as well.
@@ -166,17 +88,8 @@ __attribute__((section(".text#"))) static u8 SwapContextCode[] = {
 	0xc3						  //
 };
 
-/// Get the current thread's context.
-///
-/// \param context Variable to store the thread's context in.
-static void (*GetContext)(FiberContext* context) = reinterpret_cast<void (*)(FiberContext*)>(GetContextCode);
-
-/// Set the current thread's context.
-///
-/// \param from Context to swap from.
-/// \param to Context to swap to.
-static void (*SwapContext)(
-	FiberContext* from, FiberContext* to) = reinterpret_cast<void (*)(FiberContext*, FiberContext*)>(SwapContextCode);
+void (*SwapContext)(FiberContext* from, FiberContext* to) = reinterpret_cast<void (*)(FiberContext*, FiberContext*)>(
+	SwapContextCode);
 
 #endif
 
