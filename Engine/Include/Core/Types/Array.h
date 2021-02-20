@@ -3,6 +3,8 @@
 /// Arrays and ArrayRefs.
 
 #pragma once
+#include <initializer_list>
+
 #include "Core/Memory/Memory.h"
 #include "Core/Memory/RawAllocator.h"
 #include "Core/Misc/Assert.h"
@@ -152,6 +154,20 @@ public:
 		m_Data = reinterpret_cast<T*>(m_Alloc->Allocate(sizeof(T) * size));
 		m_Size = size;
 		m_Capacity = size;
+	}
+
+	Array(const std::initializer_list<T>& list, Allocator& alloc = GAlloc) : m_Alloc(&alloc)
+	{
+		m_Data = reinterpret_cast<T*>(m_Alloc->Allocate(sizeof(T) * list.size()));
+		m_Size = list.size();
+		m_Capacity = list.size();
+
+		for (u64 i = 0; const auto& elem : list)
+		{
+			Construct<T>(m_Data + i, elem);
+
+			i++;
+		}
 	}
 
 	/// Copy constructor.

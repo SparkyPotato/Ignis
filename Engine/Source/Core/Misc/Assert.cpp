@@ -1,7 +1,7 @@
 /// Copyright (c) 2021 Shaye Garg.
 
 #include "Core/Misc/Assert.h"
-#include "Platform/Internals.h"
+#include "Core/Platform/Internals.h"
 
 namespace Ignis {
 

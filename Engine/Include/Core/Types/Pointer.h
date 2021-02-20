@@ -24,19 +24,11 @@ public:
 	Owner(Owner<O>&& other)
 	{
 		m_Ptr = other.m_Ptr;
-		m_Alloc = other.m_Alloc;
 		other.m_Ptr = nullptr;
 	}
 
 	/// Destructor
-	~Owner()
-	{
-		if (m_Ptr)
-		{
-			m_Ptr->~T();
-			m_Alloc->Deallocate(m_Ptr);
-		}
-	}
+	~Owner() { Delete(m_Ptr); }
 
 	/// Dereference the pointer.
 	///
@@ -57,27 +49,25 @@ private:
 	template<typename O, typename... Args>
 	friend Owner<O> MakeUnique(Args&&... args, Allocator& alloc);
 
-	Owner(T* set, Allocator* alloc)
+	Owner(T* set)
 	{
 		m_Ptr = set;
-		m_Alloc = alloc;
 	}
 
 	T* m_Ptr = nullptr;
-	Allocator* m_Alloc = nullptr;
 };
 
 /// Instantiate an object with single ownership.
-/// 
+///
 /// \tparam T Type of object to instantiate.
 /// \param args Arguments to pass to constructor.
 /// \param alloc Allocator to use for allocating the object.
-/// 
+///
 /// \return Owning pointer to the created object.
 template<typename T, typename... Args>
 Owner<T> MakeUnique(Args&&... args, Allocator& alloc = GAlloc)
 {
-	return Owner<T>(New<T>(static_cast<Args&&>(args)..., alloc), &alloc);
+	return Owner<T>(New<T>(static_cast<Args&&>(args)..., alloc));
 }
 
 /// Reference counted pointer.
@@ -92,8 +82,7 @@ public:
 	Handle(const Handle<O>& other)
 	{
 		m_Ptr = other.m_Ptr;
-		m_Ref = other.m_Ref
-		(*m_Ref)++;
+		m_Ref = other.m_Ref(*m_Ref)++;
 	}
 
 	/// Implicit conversion between automatically convertible types.
@@ -108,7 +97,7 @@ public:
 	/// Destructor
 	~Handle()
 	{
-		if (m_Ptr) 
+		if (m_Ptr)
 		{
 			(*m_Ref)--;
 			if (!(*m_Ref)) // Destroy if refcount is 0.
@@ -149,8 +138,8 @@ private:
 template<typename O, typename... Args>
 Handle<O> MakeShared(Args&&... args, Allocator& alloc)
 {
-	auto ptr = New<O>(static_cast<Args&&>(args)...);
-	auto ref = New<std::atomic<u64>>(1);
+	auto ptr = New<O>(alloc, static_cast<Args&&>(args)...);
+	auto ref = New<std::atomic<u64>>(alloc, 1);
 	return Handle<O>(ptr, ref);
 }
 

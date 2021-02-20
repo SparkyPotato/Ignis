@@ -16,7 +16,7 @@ int Entry(Ignis::StringRef invocation, Ignis::ArrayRef<Ignis::StringRef> argumen
 
 #ifdef PLATFORM_WINDOWS
 
-#	include "Platform/Internals.h"
+#	include "Core/Platform/Internals.h"
 
 int wmain(int argc, wchar_t** argv)
 {

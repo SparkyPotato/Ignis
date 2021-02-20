@@ -40,6 +40,8 @@ public:
 	///
 	/// \return Pointer to the allocated callable. Free with Delete() if not equal to at.
 	virtual Callable* Clone(void* at, u64 size, Allocator& alloc = GAlloc) const = 0;
+
+	using Type = Ret(Args...);
 };
 
 template<typename, typename>
@@ -103,6 +105,18 @@ private:
 	T* m_Object;
 	Ret (T::*m_Function)(Args...);
 };
+
+template<typename Ret, typename... Args>
+auto DeduceCallable(Ret (*)(Args...)) -> Callable<Ret(Args...)>;
+
+template<typename T, typename Ret, typename... Args>
+auto DeduceCallableImpl(Ret (T::*)(Args...)) -> Callable<Ret(Args...)>;
+
+template<typename T, typename Ret, typename... Args>
+auto DeduceCallableImpl(Ret (T::*)(Args...) const) -> Callable<Ret(Args...)>;
+
+template<typename C>
+auto DeduceCallable(C) -> decltype(DeduceCallableImpl(&C::operator()));
 
 }
 
@@ -224,10 +238,17 @@ private:
 	bool m_IsSmall = false;
 };
 
-template<typename Ret, typename... Args, typename T>
-Private::FCallable<Ret(Args...), T> Bind(const T& callable)
+template<typename T>
+auto Bind(const T& callable)
 {
-	return Private::FCallable<Ret(Args...), T>(callable);
+	using CallableType = decltype(Private::DeduceCallable(callable));
+	return Private::FCallable<CallableType::Type, T>(callable);
+}
+
+template<typename T, typename Ret, typename...Args>
+auto Bind(Ret(T::*function)(Args...), T* obj)
+{
+	return Private::MCallable<Ret(Args...), T>(function, obj);
 }
 
 }

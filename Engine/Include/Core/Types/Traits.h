@@ -3,6 +3,7 @@
 /// Helpers for concepts and traits.
 
 #pragma once
+#include <concepts>
 #include <type_traits>
 
 #include "Core/Types/BaseTypes.h"

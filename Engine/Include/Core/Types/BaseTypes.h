@@ -5,7 +5,7 @@
 #pragma once
 #include <cstdint>
 
-#include "Core/Platform.h"
+#include "Core/Platform/Platform.h"
 
 namespace Ignis {
 

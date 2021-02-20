@@ -3,7 +3,7 @@
 /// Native OS mutexes.
 
 #pragma once
-#include "Core/Platform.h"
+#include "Core/Platform/Platform.h"
 
 namespace Ignis {
 

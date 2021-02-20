@@ -78,9 +78,12 @@ T* New(Allocator& alloc, Args&&... args)
 template<typename T>
 void Delete(T* object)
 {
-	object->~T();
-	auto ptr = reinterpret_cast<Allocator*>(object) - 1;
-	ptr->Deallocate(ptr + 1);
+	if (object)
+	{
+		object->~T();
+		auto ptr = reinterpret_cast<Allocator*>(object) - 1;
+		ptr->Deallocate(ptr + 1);
+	}
 }
 
 }

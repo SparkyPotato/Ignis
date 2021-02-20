@@ -1,6 +1,6 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Platform/Internals.h"
+#include "Core/Platform/Internals.h"
 
 #ifdef PLATFORM_WINDOWS
 #	define WIN32_LEAN_AND_MEAN

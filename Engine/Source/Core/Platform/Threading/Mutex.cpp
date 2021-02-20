@@ -1,6 +1,6 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Platform/Threading/Mutex.h"
+#include "Core/Platform/Threading/Mutex.h"
 
 #ifdef PLATFORM_WINDOWS
 

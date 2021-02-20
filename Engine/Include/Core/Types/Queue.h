@@ -196,7 +196,7 @@ public:
 	}
 
 private:
-	template<typename T>
+	template<typename S>
 	class Slot
 	{
 	public:
@@ -208,10 +208,10 @@ private:
 			}
 		}
 
-		void Destroy() { Storage.~T(); }
+		void Destroy() { Storage.~S(); }
 
 		alignas(64) std::atomic<u64> Turn = 0;
-		T Storage;
+		S Storage;
 	};
 
 	constexpr u64 Index(u64 i) { return i & m_Mask; }

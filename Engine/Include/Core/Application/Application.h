@@ -3,7 +3,7 @@
 /// Entry handler for Ignis applications.
 
 #pragma once
-#include "Core/Platform.h"
+#include "Core/Platform/Platform.h"
 
 namespace Ignis {
 

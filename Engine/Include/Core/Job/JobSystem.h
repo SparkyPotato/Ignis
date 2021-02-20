@@ -4,8 +4,8 @@
 
 #pragma once
 #include "Core/Types/Array.h"
-#include "Job/Condition.h"
-#include "Job/Job.h"
+#include "Core/Job/Condition.h"
+#include "Core/Job/Job.h"
 
 namespace Ignis {
 
@@ -16,7 +16,7 @@ namespace JobSystem {
 /// \param threadCount Number of worker threads to spawn.
 /// If 0, is set to the maximum number of concurrent threads supported by the hardware - 1.
 /// \param memUsage Memory to use for Fiber stacks, in MB. Defaults to 100 MB.
-IGNIS_API void Initialize(u16 threadCount, u64 memUsage = 100);
+IGNIS_API void Initialize(u16 threadCount = 0, u64 memUsage = 100);
 
 /// Submit a list of jobs to the job system.
 /// Use this when you're submitting jobs and doing some more work before waiting for them to complete.

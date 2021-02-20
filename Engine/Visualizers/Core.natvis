@@ -41,6 +41,21 @@
 		<DisplayString>{m_Callable}</DisplayString>
 		<Expand></Expand>
 	</Type>
+
+	<Type Name="Ignis::Handle&lt;*&gt;">
+		<DisplayString>{*m_ptr}</DisplayString>
+		<Expand>
+			<Item Name="Value">*m_Ptr</Item>
+			<Item Name="References">*m_Ref</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="Ignis::Owner&lt;*&gt;">
+		<DisplayString>{*m_Ptr}</DisplayString>
+		<Expand>
+			<Item Name="Value">*m_Ptr</Item>
+		</Expand>
+	</Type>
 	
 	<Type Name="Ignis::RawAllocator">
 		<DisplayString>Raw Allocator</DisplayString>
@@ -72,10 +87,19 @@
 		<Expand></Expand>
 	</Type>
 
-	<Type Name="Ignis::UniquePtr&lt;*&gt;">
-		<DisplayString>{*m_Ptr}</DisplayString>
+	<Type Name="Ignis::TypeDescriptor">
+		<DisplayString>{Name}</DisplayString>
 		<Expand>
-			<Item Name="Value">*m_Ptr</Item>
+			<Item Name="Type">Name</Item>
+			<Item Name="Size">Size</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Ignis::ArrayDescriptor">
+		<DisplayString>{Name}</DisplayString>
+		<Expand>
+			<Item Name="Holds">Holding</Item>
+			<Item Name="Size">Size</Item>
 		</Expand>
 	</Type>
 	

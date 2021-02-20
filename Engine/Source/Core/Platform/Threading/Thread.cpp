@@ -1,9 +1,9 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Platform/Threading/Thread.h"
+#include "Core/Platform/Threading/Thread.h"
 
-#include "Core/Platform.h"
-#include "Platform/Internals.h"
+#include "Core/Platform/Platform.h"
+#include "Core/Platform/Internals.h"
 
 #ifdef PLATFORM_WINDOWS
 

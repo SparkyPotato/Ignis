@@ -1,14 +1,14 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Job/JobSystem.h"
+#include "Core/Job/JobSystem.h"
 
 #include <atomic>
 
 #include "Core/Types/Array.h"
 #include "Core/Types/Pair.h"
 #include "Core/Types/Queue.h"
-#include "Job/Fiber.h"
-#include "Platform/Threading/Thread.h"
+#include "Core/Job/Fiber.h"
+#include "cORE/Platform/Threading/Thread.h"
 
 namespace Ignis {
 
@@ -34,7 +34,7 @@ static void FiberFunction();
 
 struct Fiber
 {
-	Fiber() { Context.rip = &FiberFunction; }
+	Fiber() { Context.rip = reinterpret_cast<void*>(&FiberFunction); }
 
 	FiberContext Context;
 	u8 Stack[64 * 1024];

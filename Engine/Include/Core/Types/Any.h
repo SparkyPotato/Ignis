@@ -25,6 +25,8 @@ public:
 	{
 		m_Data = &value;
 		m_Manager = &Manager<T>::Manage;
+
+		return *this;
 	}
 
 	/// Get the contained reference.
