@@ -275,4 +275,23 @@ bool IGNIS_API operator!=(const String& first, const String& second);
 
 String IGNIS_API operator+(StringRef first, StringRef second);
 
+template<typename>
+struct Hasher;
+
+/// Hasher for String, uses MurmurHash3:
+/// https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+template<>
+struct IGNIS_API Hasher<String>
+{
+	static u64 Hash(const String& string);
+};
+
+/// Hasher for StringRef, uses MurmurHash3:
+/// https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+template<>
+struct IGNIS_API Hasher<StringRef>
+{
+	static u64 Hash(const StringRef& string);
+};
+
 }

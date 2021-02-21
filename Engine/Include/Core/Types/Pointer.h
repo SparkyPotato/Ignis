@@ -13,22 +13,22 @@ namespace Ignis {
 ///
 /// \tparam T Type to point to.
 template<typename T>
-class Owner
+class UniquePtr
 {
 public:
-	Owner() = default;
-	Owner(const Owner<T>& other) = delete;
+	UniquePtr() = default;
+	UniquePtr(const UniquePtr<T>& other) = delete;
 
 	/// Implicit conversion between automatically convertible types.
 	template<typename O>
-	Owner(Owner<O>&& other)
+	UniquePtr(UniquePtr<O>&& other)
 	{
 		m_Ptr = other.m_Ptr;
 		other.m_Ptr = nullptr;
 	}
 
 	/// Destructor
-	~Owner() { Delete(m_Ptr); }
+	~UniquePtr() { Delete(m_Ptr); }
 
 	/// Dereference the pointer.
 	///
@@ -47,12 +47,9 @@ public:
 
 private:
 	template<typename O, typename... Args>
-	friend Owner<O> MakeUnique(Args&&... args, Allocator& alloc);
+	friend UniquePtr<O> MakeUnique(Args&&... args, Allocator& alloc);
 
-	Owner(T* set)
-	{
-		m_Ptr = set;
-	}
+	UniquePtr(T* set) { m_Ptr = set; }
 
 	T* m_Ptr = nullptr;
 };
@@ -65,21 +62,21 @@ private:
 ///
 /// \return Owning pointer to the created object.
 template<typename T, typename... Args>
-Owner<T> MakeUnique(Args&&... args, Allocator& alloc = GAlloc)
+UniquePtr<T> MakeUnique(Args&&... args, Allocator& alloc = GAlloc)
 {
-	return Owner<T>(New<T>(static_cast<Args&&>(args)..., alloc));
+	return UniquePtr<T>(New<T>(static_cast<Args&&>(args)..., alloc));
 }
 
 /// Reference counted pointer.
 template<typename T>
-class Handle
+class SharedPtr
 {
 public:
-	Handle() = default;
+	SharedPtr() = default;
 
 	/// Implicit conversion between automatically convertible types.
 	template<typename O>
-	Handle(const Handle<O>& other)
+	SharedPtr(const SharedPtr<O>& other)
 	{
 		m_Ptr = other.m_Ptr;
 		m_Ref = other.m_Ref(*m_Ref)++;
@@ -87,7 +84,7 @@ public:
 
 	/// Implicit conversion between automatically convertible types.
 	template<typename O>
-	Handle(Handle<O>&& other)
+	SharedPtr(SharedPtr<O>&& other)
 	{
 		m_Ptr = other.m_Ptr;
 		m_Ref = other.m_Ref;
@@ -95,7 +92,7 @@ public:
 	}
 
 	/// Destructor
-	~Handle()
+	~SharedPtr()
 	{
 		if (m_Ptr)
 		{
@@ -120,9 +117,9 @@ public:
 
 private:
 	template<typename O, typename... Args>
-	friend Handle<O> MakeShared(Args&&... args, Allocator& alloc);
+	friend SharedPtr<O> MakeShared(Args&&... args, Allocator& alloc);
 
-	Handle(T* ptr, std::atomic<u64>* ref) : m_Ptr(ptr), m_Ref(ref) {}
+	SharedPtr(T* ptr, std::atomic<u64>* ref) : m_Ptr(ptr), m_Ref(ref) {}
 
 	T* m_Ptr;
 	std::atomic<u64>* m_Ref;
@@ -136,11 +133,52 @@ private:
 ///
 /// \return Owning pointer to the created object.
 template<typename O, typename... Args>
-Handle<O> MakeShared(Args&&... args, Allocator& alloc)
+SharedPtr<O> MakeShared(Args&&... args, Allocator& alloc)
 {
 	auto ptr = New<O>(alloc, static_cast<Args&&>(args)...);
 	auto ref = New<std::atomic<u64>>(alloc, 1);
-	return Handle<O>(ptr, ref);
+	return SharedPtr<O>(ptr, ref);
 }
+
+template<typename>
+class Array;
+
+/// Pointer to an element in an Array.
+///
+/// \tparam Type held in the Array.
+template<typename T>
+class ArrayPtr
+{
+public:
+	ArrayPtr() = default;
+
+	/// Constructor.
+	///
+	/// \param array Array to point to.
+	/// \param index Index of the object in the array.
+	ArrayPtr(Array<T>* array, u64 index) : m_Array(array), m_Index(index) {}
+
+	/// Contructor.
+	///
+	/// \param array Array to point to.
+	/// \param pointer Pointer to the object to point to.
+	ArrayPtr(Array<T>* array, T* pointer) : m_Array(array), m_Index(pointer - array->Data()) {}
+
+	T& operator*()
+	{
+		IASSERT(m_Array, "ArrayPtr is nullptr!");
+		return m_Array[m_Index];
+	}
+
+	T* operator->()
+	{
+		IASSERT(m_Array, "ArrayPtr is nullptr!");
+		return &m_Array[m_Index];
+	}
+
+private:
+	Array<T>* m_Array = nullptr;
+	u64 m_Index;
+};
 
 }

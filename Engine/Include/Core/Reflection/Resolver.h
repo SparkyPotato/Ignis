@@ -10,7 +10,7 @@
 namespace Ignis {
 
 template<typename T>
-concept CustomType = requires()
+concept CustomReflectable = requires()
 {
 	{
 		&T::ReflectionDescriptor
@@ -19,30 +19,27 @@ concept CustomType = requires()
 };
 
 template<typename T>
-concept PrimitiveType = Traits::IsComplete<PrimitiveDescriptor<T>>::value;
+concept PrimitiveReflectable = Traits::IsComplete<PrimitiveDescriptor<T>>::value;
 
-template<PrimitiveType>
+template<typename T>
+concept Reflectable = CustomReflectable<T> || PrimitiveReflectable<T>;
+
+template<PrimitiveReflectable>
 class PrimitiveResolver;
 
 class DefaultResolver
 {
 public:
-	template<PrimitiveType T>
+	template<PrimitiveReflectable T>
 	static const TypeDescriptor* Get()
 	{
 		return PrimitiveResolver<T>::Get();
 	}
 
-	template<CustomType T>
+	template<CustomReflectable T>
 	static const TypeDescriptor* Get()
 	{
 		return &T::ReflectionDescriptor;
-	}
-
-	template<typename T>
-	static const TypeDescriptor* Get()
-	{
-		static_assert(false, "T is not reflectable!");
 	}
 };
 
@@ -53,7 +50,7 @@ public:
 	static const TypeDescriptor* Get() { return DefaultResolver::Get<T>(); }
 };
 
-template<PrimitiveType T>
+template<PrimitiveReflectable T>
 class PrimitiveResolver
 {
 public:
@@ -61,6 +58,71 @@ public:
 
 private:
 	const static inline PrimitiveDescriptor<T> m_Desc;
+};
+
+struct ArrayDescriptor : TypeDescriptor
+{
+	template<typename T>
+	ArrayDescriptor(T* holdingTypeForImplicitTemplates)
+		: TypeDescriptor("Array<>", sizeof(Array<T>)), Holding(Resolver<T>::Get())
+	{
+	}
+
+	String GetName() const override { return "Array<" + Holding->GetName() + ">"; }
+
+	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
+
+	/// The descriptor of the type the Array is holding.
+	const TypeDescriptor* Holding;
+};
+
+struct PairDescriptor : TypeDescriptor
+{
+	template<typename T, typename U>
+	PairDescriptor(T* implicit1, U* implicit2)
+		: TypeDescriptor("Pair<>", sizeof(Pair<T, U>)), First(Resolver<T>::Get()), Second(Resolver<U>::Get())
+	{
+	}
+
+	String GetName() const override { return "Pair<" + First->GetName() + ", " + Second->GetName() + ">"; }
+
+	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
+
+	/// First type in the pair.
+	const TypeDescriptor* First;
+
+	/// Second type in the pair.
+	const TypeDescriptor* Second;
+};
+
+struct UniquePtrDescriptor : TypeDescriptor
+{
+	template<typename T>
+	UniquePtrDescriptor(T* implicit) : TypeDescriptor("UniquePtr<>", sizeof(UniquePtr<T>)), Holding(Resolver<T>::Get())
+	{
+	}
+
+	String GetName() const override { return "UniquePtr<" + Holding->GetName() + ">"; }
+
+	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
+
+	/// The descriptor of the type the UniquePtr is holding.
+	const TypeDescriptor* Holding;
+};
+
+struct SharedPtrDescriptor : TypeDescriptor
+{
+	template<typename T>
+	SharedPtrDescriptor(T* implicit) : TypeDescriptor("SharedPtr<>", sizeof(SharedPtr<T>)), Holding(Resolver<T>::Get())
+	{
+	}
+
+	String GetName() const override { return "SharedPtr<" + Holding->GetName() + ">"; }
+
+	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
+
+	/// The descriptor of the type theSharedPtr is holding.
+	const TypeDescriptor* Holding;
 };
 
 template<typename T>
@@ -84,23 +146,23 @@ private:
 };
 
 template<typename T>
-class Resolver<Owner<T>>
+class Resolver<UniquePtr<T>>
 {
 public:
 	static const TypeDescriptor* Get() { return &m_Desc; }
 
 private:
-	const static inline OwnerDescriptor m_Desc = OwnerDescriptor((T*) nullptr);
+	const static inline UniquePtrDescriptor m_Desc = UniquePtrDescriptor((T*) nullptr);
 };
 
 template<typename T>
-class Resolver<Handle<T>>
+class Resolver<SharedPtr<T>>
 {
 public:
 	static const TypeDescriptor* Get() { return &m_Desc; }
 
 private:
-	const static inline HandleDescriptor m_Desc = HandleDescriptor((T*) nullptr);
+	const static inline SharedPtrDescriptor m_Desc = SharedPtrDescriptor((T*) nullptr);
 };
 
 }

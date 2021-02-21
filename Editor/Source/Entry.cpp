@@ -3,15 +3,13 @@
 #include "Core/Platform/Entry.h"
 #include "Core/Job/JobSystem.h"
 
-#include "Core/Reflection/Resolver.h"
-
 using namespace Ignis;
 
-int Entry(StringRef invocation, ArrayRef<StringRef> arguments) 
+int Entry(StringRef invocation, ArrayRef<StringRef> arguments)
 {
 	JobSystem::Initialize();
 
 	JobSystem::Quit();
 
-	return 0; 
+	return 0;
 }

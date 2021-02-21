@@ -8,11 +8,9 @@
 #include "Core/Memory/Memory.h"
 #include "Core/Memory/RawAllocator.h"
 #include "Core/Misc/Assert.h"
+#include "Core/Types/Traits.h"
 
 namespace Ignis {
-
-template<typename T>
-class Array;
 
 /// View into an Array, SafeArray, SmallArray, or StackArray.
 /// You might know it as a Span.
@@ -27,11 +25,6 @@ public:
 	/// \param data Pointer to first element in the sequence.
 	/// \param size Number of elements in the sequence.
 	ArrayRef(T* data, u64 size) : m_Data(data), m_Size(size) {}
-
-	/// Construct an ArrayRef from an Array.
-	///
-	/// \param array Array to reference.
-	ArrayRef(const Array<T>& array) : m_Data(array.Data()), m_Size(array.Size()) {}
 
 	/// Index.
 	///
@@ -276,6 +269,9 @@ public:
 		IASSERT(index < m_Size, "Out of bounds access in Array");
 		return m_Data[index];
 	}
+
+	/// Convert the Array into an ArrayRef.
+	operator ArrayRef<T>() { return ArrayRef<T>(Data(), Size()); }
 
 	/// Get the first element of the Array.
 	///

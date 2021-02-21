@@ -17,6 +17,14 @@
 		</Expand>
 	</Type>
 
+	<Type Name="Ignis::ArrayDescriptor">
+		<DisplayString>{Name}</DisplayString>
+		<Expand>
+			<Item Name="Holds">Holding</Item>
+			<Item Name="Size">Size</Item>
+		</Expand>
+	</Type>
+
 	<Type Name="Ignis::ArrayRef&lt;*&gt;">
 		<DisplayString>Size = {m_Size}</DisplayString>
 		<Expand>
@@ -42,24 +50,35 @@
 		<Expand></Expand>
 	</Type>
 
-	<Type Name="Ignis::Handle&lt;*&gt;">
-		<DisplayString>{*m_ptr}</DisplayString>
+	<Type Name="Ignis::HashMap&lt;*, *&gt;">
+		<DisplayString>Size = {m_Size}</DisplayString>
 		<Expand>
-			<Item Name="Value">*m_Ptr</Item>
-			<Item Name="References">*m_Ref</Item>
-		</Expand>
-	</Type>
-	
-	<Type Name="Ignis::Owner&lt;*&gt;">
-		<DisplayString>{*m_Ptr}</DisplayString>
-		<Expand>
-			<Item Name="Value">*m_Ptr</Item>
+			<Item Name="Capacity">m_Capacity</Item>
+			<CustomListItems>
+				<Variable Name="i" InitialValue="0"/>
+				<Size>m_Size</Size>
+				<Loop>
+					<Break Condition="i == m_Capacity"/>
+					<If Condition="m_Buckets[i].Status == Bucket::Full">
+						<Item Name="[{m_Buckets[i].Slot.First}]">m_Buckets[i].Slot.Second</Item>
+					</If>
+					<Exec>i++</Exec>
+				</Loop>
+			</CustomListItems>
 		</Expand>
 	</Type>
 	
 	<Type Name="Ignis::RawAllocator">
 		<DisplayString>Raw Allocator</DisplayString>
 		<Expand></Expand>
+	</Type>
+
+	<Type Name="Ignis::SharedPtr&lt;*&gt;">
+		<DisplayString>{*m_ptr}</DisplayString>
+		<Expand>
+			<Item Name="Value">*m_Ptr</Item>
+			<Item Name="References">*m_Ref</Item>
+		</Expand>
 	</Type>
 	
 	<Type Name="Ignis::String">
@@ -95,11 +114,10 @@
 		</Expand>
 	</Type>
 
-	<Type Name="Ignis::ArrayDescriptor">
-		<DisplayString>{Name}</DisplayString>
+	<Type Name="Ignis::UniquePtr&lt;*&gt;">
+		<DisplayString>{*m_Ptr}</DisplayString>
 		<Expand>
-			<Item Name="Holds">Holding</Item>
-			<Item Name="Size">Size</Item>
+			<Item Name="Value">*m_Ptr</Item>
 		</Expand>
 	</Type>
 	

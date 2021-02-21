@@ -241,8 +241,8 @@ private:
 template<typename T>
 auto Bind(const T& callable)
 {
-	using CallableType = decltype(Private::DeduceCallable(callable));
-	return Private::FCallable<CallableType::Type, T>(callable);
+	using CallableType = typename decltype(Private::DeduceCallable(callable))::Type;
+	return Private::FCallable<CallableType, T>(callable);
 }
 
 template<typename T, typename Ret, typename...Args>

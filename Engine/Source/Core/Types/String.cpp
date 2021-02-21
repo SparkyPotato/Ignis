@@ -476,4 +476,112 @@ String operator+(StringRef first, StringRef second)
 	return str + second;
 }
 
+constexpr u32 FMix32(u32 h)
+{
+	h ^= h >> 16;
+	h *= 0x85ebca6b;
+	h ^= h >> 13;
+	h *= 0xc2b2ae35;
+	h ^= h >> 16;
+
+	return h;
+}
+
+u32 Rotl(u32 number, u32 places)
+{
+#ifdef COMPILER_MSVC
+	return _rotl(number, places);
+#else
+	return (number << places) | (number >> (32 - places));
+#endif
+}
+
+u64 Hasher<String>::Hash(const String& string)
+{
+	const u8* data = reinterpret_cast<const u8*>(string.CString());
+	u32 blockCount = string.Size() / 4;
+
+	u32 h1 = 192837465; // Seed
+	u32 c1 = 0xcc9e2d51;
+	u32 c2 = 0x1b873593;
+
+	const u32* blocks = reinterpret_cast<const u32*>(data + blockCount * 4);
+	for (i32 i = -blockCount; i; i++)
+	{
+		u32 k1 = blocks[i];
+
+		k1 *= c1;
+		k1 = Rotl(k1, 15);
+		k1 *= c2;
+
+		h1 ^= k1;
+		h1 = Rotl(h1, 13);
+		h1 = h1 * 5 + 0xe6546b64;
+	}
+
+	const u8* tail = reinterpret_cast<const u8*>(data + blockCount * 4);
+	u32 k1 = 0;
+
+	switch (string.Size() & 3)
+	{
+	case 3:
+		k1 ^= tail[2] << 16;
+	case 2:
+		k1 ^= tail[1] << 8;
+	case 1:
+		k1 ^= tail[0];
+		k1 *= c1;
+		k1 = Rotl(k1, 15);
+		k1 *= c2;
+		h1 ^= k1;
+	}
+
+	h1 ^= string.Size();
+	return FMix32(h1);
+}
+
+u64 Ignis::Hasher<StringRef>::Hash(const StringRef& string)
+{
+	const u8* data = reinterpret_cast<const u8*>(string.Data());
+	u32 blockCount = string.Size() / 4;
+
+	u32 h1 = 192837465; // Seed
+	u32 c1 = 0xcc9e2d51;
+	u32 c2 = 0x1b873593;
+
+	const u32* blocks = reinterpret_cast<const u32*>(data + blockCount * 4);
+	for (i32 i = -blockCount; i; i++)
+	{
+		u32 k1 = blocks[i];
+
+		k1 *= c1;
+		k1 = Rotl(k1, 15);
+		k1 *= c2;
+
+		h1 ^= k1;
+		h1 = Rotl(h1, 13);
+		h1 = h1 * 5 + 0xe6546b64;
+	}
+
+	const u8* tail = reinterpret_cast<const u8*>(data + blockCount * 4);
+	u32 k1 = 0;
+
+	switch (string.Size() & 3)
+	{
+	case 3:
+		k1 ^= tail[2] << 16;
+	case 2:
+		k1 ^= tail[1] << 8;
+	case 1:
+		k1 ^= tail[0];
+		k1 *= c1;
+		k1 = Rotl(k1, 15);
+		k1 *= c2;
+		h1 ^= k1;
+	}
+
+	h1 ^= string.Size();
+	return FMix32(h1);
+}
+
 }

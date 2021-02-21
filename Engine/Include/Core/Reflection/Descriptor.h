@@ -4,19 +4,21 @@
 
 #pragma once
 #include "Core/Types/Array.h"
+#include "Core/Types/Map.h"
 #include "Core/Types/Pair.h"
 #include "Core/Types/Pointer.h"
 #include "Core/Types/String.h"
 
 namespace Ignis {
 
-struct ClassDescriptor;
+struct TypeDescriptor;
 template<typename>
 struct PrimitiveDescriptor;
+struct ClassDescriptor;
 struct ArrayDescriptor;
 struct PairDescriptor;
-struct OwnerDescriptor;
-struct HandleDescriptor;
+struct UniquePtrDescriptor;
+struct SharedPtrDescriptor;
 
 class DescriptorVisitor
 {
@@ -98,15 +100,15 @@ public:
 	/// \param desc Descriptor to visit.
 	virtual void Visit(const PairDescriptor& desc) = 0;
 
-	/// Visit an Owner.
+	/// Visit a UniquePtr.
 	///
 	/// \param desc Descriptor to visit.
-	virtual void Visit(const OwnerDescriptor& desc) = 0;
+	virtual void Visit(const UniquePtrDescriptor& desc) = 0;
 
-	/// Visit a Handle.
+	/// Visit a SharedPtr.
 	///
 	/// \param desc Descriptor to visit.
-	virtual void Visit(const HandleDescriptor& desc) = 0;
+	virtual void Visit(const SharedPtrDescriptor& desc) = 0;
 
 	/// Visit a class.
 	///
@@ -250,34 +252,11 @@ struct PrimitiveDescriptor<String> : TypeDescriptor
 /// A member of a class or struct.
 struct ClassMember
 {
-	/// Name of the member.
-	StringRef Name;
-
 	/// Offset of the member from a pointer to the class.
 	u64 Offset;
 
 	/// TypeDescriptor of the member's type.
 	const TypeDescriptor* Type;
-};
-
-/// A member function of a class or struct.
-struct ClassFunction
-{
-	/// Name of the function.
-	StringRef Name;
-
-	/// Type that the function returns.
-	const TypeDescriptor* Return;
-
-	/// Types of the arguments, in order (left to right).
-	Array<const TypeDescriptor*> Arguments;
-};
-
-/// A constructor of a class or struct.
-struct Constructor
-{
-	/// Arguments of the Constructor.
-	Array<const TypeDescriptor*> Arguments;
 };
 
 /// Descriptor of a class or struct.
@@ -289,88 +268,17 @@ struct ClassDescriptor : TypeDescriptor
 	/// \param size Size of the class or struct.
 	ClassDescriptor(StringRef name, u64 size) : TypeDescriptor(name, size) {}
 
-	/// Constructors of the class or struct.
-	/// Constructors[0] is always the default constructor, if it exists.
-	Array<Constructor> Constructors;
-
 	/// Public members of the class or struct.
-	Array<ClassMember> PublicMembers;
-
-	/// Public functions of the class or struct.
-	Array<ClassFunction> PublicFunctions;
+	HashMap<StringRef, ClassMember> PublicMembers;
 
 	/// Private and protected members of the class or struct.
-	Array<ClassMember> PrivateMembers;
+	HashMap<StringRef, ClassMember> PrivateMembers;
 
-	// We don't include private or protected functions because the private members only exist for complete
-	// serialization.
-
-	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
-};
-
-struct ArrayDescriptor : TypeDescriptor
-{
-	template<typename T>
-	ArrayDescriptor(T* holdingTypeForImplicitTemplates)
-		: TypeDescriptor("Array<>", sizeof(Array<T>)), Holding(Resolver<T>::Get())
-	{
-	}
-
-	String GetName() const override { return "Array<" + Holding->GetName() + ">"; }
+	/// The class or struct derived from. Multiple inheritance is NOT supported , which is why only one parent pointer
+	/// exists.
+	ClassDescriptor* Parent = nullptr;
 
 	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
-
-	/// The descriptor of the type the Array is holding.
-	const TypeDescriptor* Holding;
-};
-
-struct PairDescriptor : TypeDescriptor
-{
-	template<typename T, typename U>
-	PairDescriptor(T* implicit1, U* implicit2)
-		: TypeDescriptor("Pair<>", sizeof(Pair<T, U>)), First(Resolver<T>::Get()), Second(Resolver<U>::Get())
-	{
-	}
-
-	String GetName() const override { return "Pair<" + First->GetName() + ", " + Second->GetName() + ">"; }
-
-	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
-
-	/// First type in the pair.
-	const TypeDescriptor* First;
-
-	/// Second type in the pair.
-	const TypeDescriptor* Second;
-};
-
-struct OwnerDescriptor : TypeDescriptor
-{
-	template<typename T>
-	OwnerDescriptor(T* implicit) : TypeDescriptor("Owner<>", sizeof(Owner<T>)), Holding(Resolver<T>::Get())
-	{
-	}
-
-	String GetName() const override { return "Owner<" + Holding->GetName() + ">"; }
-
-	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
-
-	/// The descriptor of the type the Owner is holding.
-	const TypeDescriptor* Holding;
-};
-
-struct HandleDescriptor : TypeDescriptor
-{
-	template<typename T>
-	HandleDescriptor(T* implicit) : TypeDescriptor("Handle<>", sizeof(Handle<T>)), Holding(Resolver<T>::Get())
-	{
-	}
-
-	String GetName() const override { return "Handle<" + Holding->GetName() + ">"; }
-
-	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
-
-	/// The descriptor of the type the Owner is holding.
-	const TypeDescriptor* Holding;
 };
 
 }
