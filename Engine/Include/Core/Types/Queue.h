@@ -218,9 +218,9 @@ private:
 	constexpr u64 Turn(u64 i) { return i / m_Capacity; }
 
 	Slot<T>* m_Slots = nullptr;
-	u64 m_Capacity;
-	u64 m_Mask;
-	Allocator* m_Alloc;
+	u64 m_Capacity = 0;
+	u64 m_Mask = 0;
+	Allocator* m_Alloc = nullptr;
 
 	alignas(64) std::atomic<u64> m_Head = 0;
 	alignas(64) std::atomic<u64> m_Tail = 0;

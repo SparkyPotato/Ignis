@@ -240,29 +240,23 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			return res.Full->Slot.Second;
+			return res.Normal->Slot.Second;
 		}
 
-		if (float(m_Size) / m_Capacity > 0.8f)
+		if (float(m_Size) / m_Capacity > 0.6f)
 		{
 			Realloc();
 			res = FindBucket(key);
 		}
 
-		if (res.Empty)
-		{
-			Construct<Pair<K, V>>(&res.Empty->Slot, key, V());
-			res.Empty->Status = Bucket::Full;
-			m_Size++;
-			return res.Empty->Slot.Second;
-		}
+		auto bucket = res.Tombstone ? res.Tombstone : res.Normal;
 
-		Construct<Pair<K, V>>(&res.Tombstone->Slot, key, V());
-		res.Tombstone->Status = Bucket::Full;
+		Construct<Pair<K, V>>(&bucket->Slot, key, V());
+		bucket->Status = Bucket::Full;
 		m_Size++;
-		return res.Tombstone->Slot.Second;
+		return bucket->Slot.Second;
 	}
 
 	/// Insert a key-value pair into the HashMap.
@@ -276,10 +270,10 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			res.Full->Slot.Second = value;
-			return res.Full->Slot;
+			res.Normal->Slot.Second = value;
+			return res.Normal->Slot;
 		}
 
 		if (float(m_Size) / m_Capacity > 0.6f)
@@ -288,18 +282,12 @@ public:
 			res = FindBucket(key);
 		}
 
-		if (res.Tombstone)
-		{
-			Construct<Pair<K, V>>(&res.Tombstone->Slot, key, value);
-			res.Tombstone->Status = Bucket::Full;
-			m_Size++;
-			return res.Tombstone->Slot;
-		}
+		auto bucket = res.Tombstone ? res.Tombstone : res.Normal;
 
-		Construct<Pair<K, V>>(&res.Empty->Slot, key, value);
-		res.Empty->Status = Bucket::Full;
+		Construct<Pair<K, V>>(&bucket->Slot, key, value);
+		bucket->Status = Bucket::Full;
 		m_Size++;
-		return res.Empty->Slot;
+		return bucket->Slot;
 	}
 
 	/// Insert a key-value pair into the HashMap.
@@ -313,10 +301,10 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			res.Full->Slot.Second = value;
-			return res.Full->Slot;
+			res.Normal->Slot.Second = value;
+			return res.Normal->Slot;
 		}
 
 		if (float(m_Size) / m_Capacity > 0.6f)
@@ -325,18 +313,12 @@ public:
 			res = FindBucket(key);
 		}
 
-		if (res.Tombstone)
-		{
-			Construct<Pair<K, V>>(&res.Tombstone->Slot, key, value);
-			res.Tombstone->Status = Bucket::Full;
-			m_Size++;
-			return res.Tombstone->Slot;
-		}
+		auto bucket = res.Tombstone ? res.Tombstone : res.Normal;
 
-		Construct<Pair<K, V>>(&res.Empty->Slot, key, value);
-		res.Empty->Status = Bucket::Full;
+		Construct<Pair<K, V>>(&bucket->Slot, key, value);
+		bucket->Status = Bucket::Full;
 		m_Size++;
-		return res.Empty->Slot;
+		return bucket->Slot;
 	}
 
 	/// Get the value stored at a key.
@@ -348,9 +330,9 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			return &res.Full->Slot.Second;
+			return &res.Normal->Slot.Second;
 		}
 
 		return nullptr;
@@ -365,9 +347,9 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			return &res.Full->Slot.Second;
+			return &res.Normal->Slot.Second;
 		}
 
 		return nullptr;
@@ -380,10 +362,10 @@ public:
 	{
 		FindResult res = FindBucket(key);
 
-		if (res.Full)
+		if (res.Normal && res.Normal->Status == Bucket::Full)
 		{
-			res.Full->Slot.~Pair<K, V>();
-			res.Full->Status = Bucket::Tombstone;
+			res.Normal->Slot.~Pair<K, V>();
+			res.Normal->Status = Bucket::Tombstone;
 			m_Size--;
 		}
 	}
@@ -443,8 +425,7 @@ public:
 private:
 	struct FindResult
 	{
-		Bucket* Full = nullptr;
-		Bucket* Empty = nullptr;
+		Bucket* Normal = nullptr;
 		Bucket* Tombstone = nullptr;
 	};
 
@@ -459,12 +440,12 @@ private:
 		{
 			if (m_Buckets[probe].Status == Bucket::Full && m_Buckets[probe].Slot.First == key)
 			{
-				result.Full = m_Buckets + probe;
+				result.Normal = m_Buckets + probe;
 				return result;
 			}
 			else if (m_Buckets[probe].Status == Bucket::Empty)
 			{
-				result.Empty = m_Buckets + probe;
+				result.Normal = m_Buckets + probe;
 				return result;
 			}
 			else if (m_Buckets[probe].Status == Bucket::Tombstone)

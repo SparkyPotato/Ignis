@@ -121,7 +121,7 @@ struct SharedPtrDescriptor : TypeDescriptor
 
 	void Visit(DescriptorVisitor& visitor) const override { visitor.Visit(*this); }
 
-	/// The descriptor of the type theSharedPtr is holding.
+	/// The descriptor of the type the SharedPtr is holding.
 	const TypeDescriptor* Holding;
 };
 

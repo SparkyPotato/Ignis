@@ -42,8 +42,8 @@ struct Fiber
 
 struct RunJob
 {
-	const Job* Declaration;
-	Fiber* Context;
+	const Job* Declaration = nullptr;
+	Fiber* Context = nullptr;
 	Counter* Decrement = nullptr;
 };
 
