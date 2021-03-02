@@ -6,7 +6,13 @@
 
 namespace Ignis {
 
+/// Ensuring that GAlloc is constructed before anything else and destroyed last.
+#ifdef COMPILER_MSVC
+#	pragma init_seg(lib)
 RawAllocator GAlloc;
+#else
+RawAllocator GAlloc __attribute__((init_priority(101)));
+#endif
 
 void* RawAllocator::Allocate(u64 size) { return malloc(size); }
 

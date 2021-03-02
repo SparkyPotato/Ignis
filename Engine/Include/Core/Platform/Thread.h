@@ -17,7 +17,7 @@ public:
 	/// Create a thread, and immediately starts it.
 	///
 	/// \param threadFunction Function to run in the thread.
-	Thread(Function<void()> threadFunction);
+	Thread(const Function<void()>& threadFunction);
 
 	~Thread();
 

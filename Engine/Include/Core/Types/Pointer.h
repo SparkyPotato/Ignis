@@ -17,7 +17,9 @@ class UniquePtr
 {
 public:
 	UniquePtr() = default;
-	UniquePtr(const UniquePtr<T>& other) = delete;
+
+	template<typename O>
+	UniquePtr(const UniquePtr<O>& other) = delete;
 
 	/// Implicit conversion between automatically convertible types.
 	template<typename O>
@@ -48,6 +50,9 @@ public:
 private:
 	template<typename O, typename... Args>
 	friend UniquePtr<O> MakeUnique(Args&&... args, Allocator& alloc);
+
+	template<typename O>
+	friend class UniquePtr;
 
 	UniquePtr(T* set) { m_Ptr = set; }
 

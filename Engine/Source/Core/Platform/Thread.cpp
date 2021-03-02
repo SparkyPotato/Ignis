@@ -1,9 +1,9 @@
 /// Copyright (c) 2021 Shaye Garg.
 
-#include "Core/Platform/Threading/Thread.h"
+#include "Core/Platform/Thread.h"
 
-#include "Core/Platform/Platform.h"
 #include "Core/Platform/Internals.h"
+#include "Core/Platform/Platform.h"
 
 #ifdef PLATFORM_WINDOWS
 
@@ -28,7 +28,7 @@ static DWORD ThreadProc(void* arg)
 	return 0;
 }
 
-Thread::Thread(Function<void()> threadFunction)
+Thread::Thread(const Function<void()>& threadFunction)
 {
 	ThreadData data{ threadFunction, CreateSemaphoreW(nullptr, 0, 1, nullptr) };
 
@@ -48,7 +48,7 @@ Thread::~Thread()
 {
 	DWORD exit;
 	GetExitCodeThread(m_PlatformHandle, &exit);
-	if (exit == STILL_ACTIVE) 
+	if (exit == STILL_ACTIVE)
 	{
 		TerminateThread(m_PlatformHandle, 0);
 		CloseHandle(m_PlatformHandle);
@@ -81,7 +81,7 @@ u16 Thread::GetMaxThreads()
 
 #else
 
-#	include<atomic>
+#	include <atomic>
 #	include <pthread.h>
 #	include <sys/sysinfo.h>
 
@@ -104,7 +104,7 @@ static void* ThreadFunction(void* arg)
 	return nullptr;
 }
 
-Thread::Thread(Function<void()> threadFunction)
+Thread::Thread(const Function<void()>& threadFunction)
 {
 	ThreadData data{ threadFunction, 1 };
 

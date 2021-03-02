@@ -14,5 +14,5 @@ void IGNIS_API Assert(bool condition, StringRef message);
 #ifdef NDEBUG
 #	define IASSERT(condition, message)
 #else
-#	define IASSERT(condition, message) Assert(condition, message)
+#	define IASSERT(condition, message) ::Ignis::Assert(condition, message)
 #endif

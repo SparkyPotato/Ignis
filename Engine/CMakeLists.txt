@@ -11,7 +11,7 @@ target_include_directories(Ignis PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(Ignis PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 
 target_compile_features(Ignis PUBLIC cxx_std_20)
-target_compile_definitions(Ignis PRIVATE BUILD_IGNIS)
 
 find_package(Threads REQUIRED)
 target_link_libraries(Ignis PRIVATE Threads::Threads)
+target_link_libraries(Ignis PUBLIC fmt)

@@ -57,7 +57,7 @@
 #endif
 
 #ifdef PLATFORM_WINDOWS
-#	ifdef BUILD_IGNIS
+#	ifdef Ignis_EXPORTS
 #		define IGNIS_API __declspec(dllexport)
 #	else
 #		define IGNIS_API __declspec(dllimport)

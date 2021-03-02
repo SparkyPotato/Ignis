@@ -8,7 +8,7 @@
 #include "Core/Types/Pair.h"
 #include "Core/Types/Queue.h"
 #include "Core/Job/Fiber.h"
-#include "cORE/Platform/Threading/Thread.h"
+#include "Core/Platform/Thread.h"
 
 namespace Ignis {
 

@@ -1,7 +1,8 @@
+; Mostly the same as SwapContextMS.asm, just with a different ABI
 mov r8, [rsp]
-mov [rdi + 8 * 0], r8 ; Store RIP
+mov [rdi + 8 * 0], r8
 lea r8, [rsp + 8 * 1]
-mov [rdi + 8 * 1], r8 ; Store RSP
+mov [rdi + 8 * 1], r8
 
 mov [rdi + 8 * 2], rbx
 mov [rdi + 8 * 3], rbp

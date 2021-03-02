@@ -137,7 +137,7 @@ public:
 	/// \param obj Object to push.
 	///
 	/// \return Reference to the pushed object.
-	T& Push(T&& obj) { return Emplace(Move(obj)); }
+	T& Push(T&& obj) { return Emplace(std::move(obj)); }
 
 	/// Try to push an object onto the queue.
 	///
@@ -159,7 +159,7 @@ public:
 		auto& slot = m_Slots[Index(tail)];
 		while (Turn(tail) * 2 + 1 != slot.Turn.load(std::memory_order::acquire)) {}
 
-		auto temp = Move(slot.Storage);
+		auto temp = std::move(slot.Storage);
 		slot.Destroy();
 		slot.Turn.store(Turn(tail) * 2 + 2, std::memory_order::release);
 
@@ -176,7 +176,7 @@ public:
 			{
 				if (m_Tail.compare_exchange_strong(tail, tail + 1))
 				{
-					obj = Move(slot.Storage);
+					obj = std::move(slot.Storage);
 					slot.Destroy();
 					slot.Turn.store(Turn(tail) * 2 + 2, std::memory_order::release);
 

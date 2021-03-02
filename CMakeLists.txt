@@ -8,3 +8,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Binaries)
 
 add_subdirectory(Engine)
 add_subdirectory(Editor)
+
+add_subdirectory(External)

@@ -9,6 +9,8 @@ namespace Ignis {
 class IGNIS_API WaitCondition
 {
 public:
+	virtual ~WaitCondition() = default;
+
 	/// Check if the condition has been satisfied.
 	/// 
 	/// \return If the condition has been satisfied and the job can wake up again.

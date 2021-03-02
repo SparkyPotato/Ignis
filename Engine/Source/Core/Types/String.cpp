@@ -121,7 +121,7 @@ String::String(Allocator& alloc) : m_Alloc(&alloc)
 	m_Repr.Small.Data[m_SmallSize] = m_SmallSize;
 }
 
-String::String(const char* cptr, Allocator& alloc)
+String::String(const char* cptr, Allocator& alloc) : m_Alloc(&alloc)
 {
 	u64 size = StrLen(cptr);
 	const Byte* ptr = reinterpret_cast<const Byte*>(cptr);

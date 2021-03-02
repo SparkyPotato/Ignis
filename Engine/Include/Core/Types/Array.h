@@ -306,6 +306,19 @@ public:
 		return *ptr;
 	}
 
+	/// Push a copy of an object into the end of the Array.
+	///
+	/// \param object Object to push.
+	///
+	/// \return Reference to the object in the Array.
+	T& Push(T&& object)
+	{
+		Realloc(m_Size + 1);
+		auto ptr = Construct<T>(m_Data + m_Size, std::move(object));
+		m_Size++;
+		return *ptr;
+	}
+
 	/// Construct an object in place at the end of the array.
 	///
 	/// \param args Arguments to pass to the constructor.
@@ -373,7 +386,7 @@ private:
 				MemCopy(data, m_Data, m_Size * sizeof(T));
 				for (u64 i = 0; auto& elem : *this)
 				{
-					Construct<T>(data + i, Move(elem));
+					Construct<T>(data + i, std::move(elem));
 				}
 				m_Alloc->Deallocate(m_Data);
 				m_Data = data;
@@ -392,31 +405,6 @@ private:
 	u64 m_Capacity = 0;
 };
 
-template<typename T>
-bool operator==(Array<T> first, Array<T> second)
-{
-	if (first.Size() != second.Size())
-	{
-		return false;
-	}
-
-	for (u64 i = 0; i < first.Size(); i++)
-	{
-		if (first[i] != second[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-template<typename T>
-bool operator!=(Array<T> first, Array<T> second)
-{
-	return !(first == second);
-}
-
 /// Array on the stack, prefer over Array if size is known at compile-time.
 ///
 /// \tparam T Type to hold in the array.
@@ -424,6 +412,62 @@ bool operator!=(Array<T> first, Array<T> second)
 template<typename T, u64 S>
 class StackArray
 {
+public:
+	StackArray(ArrayRef<T> ref)
+	{
+		IASSERT(ref.Size() < S, "Size of StackArray is not large enough");
+		for (u64 i = 0; i < ref.Size(); i++)
+		{
+			m_Array[i] = ref[i];
+		}
+	}
+
+	/// Index.
+	///
+	/// \param index The index of the element to access.
+	///
+	/// \return The element.
+	T& operator[](u64 index)
+	{
+		IASSERT(index < S, "Access out of range!");
+		return m_Array[index];
+	}
+
+	/// Index.
+	///
+	/// \param index The index of the element to access.
+	///
+	/// \return The element.
+	const T& operator[](u64 index) const
+	{
+		IASSERT(index < S, "Access out of range!");
+		return m_Array[index];
+	}
+
+	operator ArrayRef<T>() { return ArrayRef<T>(m_Array, S); }
+
+	/// Iteration.
+	///
+	/// \return Pointer to the first element of the Array.
+	T* begin() { return m_Array; }
+
+	/// Iteration.
+	///
+	/// \return Pointer to the first element of the Array.
+	const T* begin() const { return m_Array; }
+
+	/// Iteration.
+	///
+	/// \return Pointer to the element after the last element in the Array.
+	T* end() { return m_Array + S; }
+
+	/// Iteration.
+	///
+	/// \return Pointer to the element after the last element in the Array.
+	const T* end() const { return m_Array + S; }
+
+private:
+	T m_Array[S];
 };
 
 /// Array on the stack, up to S elements,

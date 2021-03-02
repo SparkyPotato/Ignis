@@ -4,6 +4,7 @@
 
 #pragma once
 #include <new> // Because self-defining placement new doesn't work with MSVC. How lovely.
+#include <utility>
 
 #include "Core/Memory/RawAllocator.h"
 
@@ -31,17 +32,6 @@ void IGNIS_API MemSet(void* destination, Byte value, u64 size);
 ///
 /// \return If both regions of memory are equal.
 bool IGNIS_API MemCompare(const void* first, const void* second, u64 size);
-
-/// Convert an object into an r-value reference.
-///
-/// \param object Object to convert.
-///
-/// \return R-value reference to object.
-template<typename T>
-T&& Move(T&& object)
-{
-	return static_cast<T&&>(object);
-}
 
 /// Construct an object at a memory location.
 ///
