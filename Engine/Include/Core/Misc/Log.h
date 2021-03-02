@@ -3,6 +3,7 @@
 /// Logging.
 
 #include <cstdlib>
+#include <mutex>
 
 #include "Core/Misc/Format.h"
 #include "Core/Types/Array.h"
@@ -103,6 +104,12 @@ public:
 	void Sink(LogLevel level, StringRef message) override;
 };
 
+class IGNIS_API DebugSink : public LogSink
+{
+public:
+	void Sink(LogLevel level, StringRef message) override;
+};
+
 }
 
 /// Declare a LogCategory. Should be placed in a header file.
@@ -120,7 +127,7 @@ public:
 /// \param level Compile-time level of the log category.
 #define IDEFINE_LOG_CATEGORY(name, level) ::Ignis::LogCategory<LogLevel::level> LogCategory_##name(#name);
 
-/// Declare and define a LOG_CATEGORY to be used in a source file.
+/// Declare and define a LogCategory to be used in a source file.
 ///
 /// \param name Name of the category.
 /// \param level Level of the category.
@@ -131,4 +138,4 @@ public:
 /// \param category Name of the category to log to.
 /// \param level Level of the log.
 /// \param ... Log message format string and format arguments.
-#define ILOG(category, level, ...) ::LogCategory_##category.Log<LogLevel::level>(__VA_ARGS__)
+#define ILOG(category, level, ...) LogCategory_##category.Log<LogLevel::level>(__VA_ARGS__)

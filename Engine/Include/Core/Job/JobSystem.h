@@ -27,20 +27,6 @@ IGNIS_API void Initialize(u16 threadCount = 0, u64 memUsage = 100);
 /// \return Condition to wait on for the jobs to complete.
 IGNIS_API const WaitCondition& Submit(ArrayRef<Job> jobs);
 
-/// Submit a list of jobs to the job system.
-/// Use this when you're submitting jobs and don't care when they complete.
-///
-/// \param jobs Reference to the list of jobs to submit.
-/// Job declarations are copied to the fiber stack, so they do not have to survive until they finish executing.
-/// 
-/// \return Condition to wait on for the jobs to complete.
-IGNIS_API const WaitCondition& SubmitAsync(ArrayRef<Job> jobs);
-
-/// Submit a list of jobs to the job system, and pause the current job till they complete.
-///
-/// \param jobs Reference to the list of jobs to submit.
-IGNIS_API void SubmitAndWait(ArrayRef<Job> jobs);
-
 /// Pause the current job until a condition becomes true.
 ///
 /// \param condition The condition to wait for.

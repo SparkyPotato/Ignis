@@ -18,7 +18,7 @@ namespace Ignis {
 template<typename... Args>
 String Format(StringRef format, Args&&... args)
 {
-	static fmt::memory_buffer out;
+	static thread_local fmt::memory_buffer out;
 	fmt::format_to(out, reinterpret_cast<const char*>(format.Data()), static_cast<Args&&>(args)...);
 	return out.data();
 }

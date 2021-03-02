@@ -8,12 +8,17 @@
 #include "fmt/core.h"
 
 #include "Core/Misc/Format.h"
+#include "Core/Platform/Internals.h"
 
 namespace Ignis {
 
 Logger* Logger::s_Logger = nullptr;
 
-Logger::Logger() { m_Sinks.Push(MakeUnique<StdoutSink>()); }
+Logger::Logger()
+{
+	m_Sinks.Push(MakeUnique<StdoutSink>());
+	m_Sinks.Push(MakeUnique<DebugSink>());
+}
 
 StringRef Logger::LevelToString(LogLevel level)
 {
@@ -65,6 +70,11 @@ void StdoutSink::Sink(LogLevel level, StringRef message)
 	case LogLevel::Fatal:
 		return fmt::print(fg(fmt::color::dark_red), "{}\n", message);
 	}
+}
+
+void DebugSink::Sink(LogLevel level, StringRef message)
+{
+	PlatformInternals::DebugOutput(message + "\n");
 }
 
 }

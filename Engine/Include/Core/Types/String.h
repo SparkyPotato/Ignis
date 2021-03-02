@@ -91,13 +91,6 @@ public:
 	/// \param string The String to take a view of.
 	StringRef(const String& string);
 
-	/// Append a StringRef.
-	///
-	/// \param ref StringRef to append.
-	///
-	/// \return String containing the concatenated string.
-	String operator+(StringRef ref) const;
-
 	/// Get the size of the view into the string.
 	///
 	/// \return The size.

@@ -25,6 +25,13 @@ Time Time::Now()
 		.Millisecond = time.wMilliseconds };
 }
 
+#else
+
+Time Time::Now() 
+{
+	
+}
+
 #endif
 
 }

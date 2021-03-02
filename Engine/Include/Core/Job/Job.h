@@ -12,9 +12,7 @@ namespace Ignis {
 struct IGNIS_API Job
 {
 	/// Function to run when the job is scheduled.
-	/// The base callable object MUST survive till the job is submitted in Async mode.
-	/// It can then be safely destroyed.
-	/// Else, it must stay alive the whole time.
+	/// The base callable object MUST survive till the job is completed.
 	FunctionRef<void(AnyRef)> Func;
 
 	/// Argument that is passed to Func.
@@ -22,9 +20,9 @@ struct IGNIS_API Job
 
 	/// Padding so that a job declaration occupies exactly 64 bytes.
 	/// This is so that one declaration fits in a single cache line, 
-	/// and there is no contention between cores for that cache line (false sharing in two lines).
+	/// and there is no contention between cores for that cache line (false sharing).
 	/// You can store the argument here if it fits - which is why we don't
-	/// alignas(std::hardware_destructive_interference_size).
+	/// alignas(std::hardware_destructive_interference_size) - because that wouldn't let us use the padding storage.
 	u8 Padding[64 - (sizeof(Func) + sizeof(Argument))];
 };
 

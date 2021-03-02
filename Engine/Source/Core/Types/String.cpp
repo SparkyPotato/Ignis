@@ -104,9 +104,8 @@ StringRef::StringRef(const char* ptr, u64 size) : m_Data(reinterpret_cast<const 
 
 StringRef::StringRef(const String& string) : m_Data(string.CString()), m_Size(string.Size()) {}
 
-String StringRef::operator+(StringRef ref) const { return String(*this) + ref; }
-
 const Byte* StringRef::Data() const { return m_Data; }
+
 u64 StringRef::Size() const { return m_Size; }
 
 StringRef::Iterator StringRef::begin() const { return Iterator(m_Data); }
