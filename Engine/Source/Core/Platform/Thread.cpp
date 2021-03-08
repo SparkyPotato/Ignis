@@ -82,8 +82,8 @@ u16 Thread::GetMaxThreads()
 #else
 
 #	include <atomic>
+#	include <thread>
 #	include <pthread.h>
-#	include <sys/sysinfo.h>
 
 namespace Ignis {
 
@@ -136,13 +136,7 @@ void Thread::SetName(StringRef name) {}
 
 u16 Thread::GetMaxThreads()
 {
-#	ifdef PLATFORM_LINUX
-	return u16(get_nprocs()); // Since we only support GCC and Clang on Linux.
-#	else // On macOS
-	int count;
-	size_t size = sizeof(count);
-	return u16(sysctlbyname("hw.ncpu", &count, &size, nullptr, 0) ? 0 : count);
-#	endif
+	return std::thread::hardware_concurrency();
 }
 
 }

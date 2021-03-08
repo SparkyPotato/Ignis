@@ -36,9 +36,9 @@
 #	endif
 #elif __clang__
 #	define COMPILER_CLANG
-#	ifdef _M_X64
+#	if __x86_64 == 1
 #		define ARCH_X64
-#	elif _M_ARM64
+#	elif __aarch64__
 #		define ARCH_ARM
 #	else
 #		error Unsupported CPU architecture!

@@ -3,7 +3,6 @@
 /// Key-value pair maps.
 
 #pragma once
-#include "Core/Math/Random.h"
 #include "Core/Memory/Memory.h"
 #include "Core/Memory/RawAllocator.h"
 #include "Core/Types/BaseTypes.h"
@@ -17,6 +16,7 @@ struct Hasher;
 
 template<typename T>
 concept HashKey = std::equality_comparable<T>&& Traits::IsComplete<Hasher<T>>::value;
+// Some strange formatting by clang-format --^^
 
 /// Open-addressed, quadratic-probed HashMap.
 ///
@@ -436,7 +436,7 @@ private:
 		u64 i = 1;
 		FindResult result;
 
-		while (true)
+		while (i < m_Capacity)
 		{
 			if (m_Buckets[probe].Status == Bucket::Full && m_Buckets[probe].Slot.First == key)
 			{
@@ -451,15 +451,12 @@ private:
 			else if (m_Buckets[probe].Status == Bucket::Tombstone)
 			{
 				result.Tombstone = m_Buckets + probe;
-				if (i > m_Capacity)
-				{
-					return result;
-				}
 			}
 
 			probe = (hash + i * i) & m_Mask;
 			i++;
 		}
+		return result;
 	}
 
 	void Realloc()
